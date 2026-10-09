@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner - Margdarshi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --primary-blue: #2563EB;
+            --primary-hover: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --primary-border: #BFDBFE;
+            --radius-card: 14px;
+            --radius-input: 10px;
+            --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: linear-gradient(180deg, #09132D 0%, #0D1C48 55%, #15358E 100%);
+            color: #94A3B8;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.15rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-brand i { color: #60A5FA; }
+        .sidebar-brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(96, 165, 250, 0.2);
+            color: #93C5FD;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.15s ease;
+        }
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-item.active {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .nav-item i { width: 19px; height: 19px; flex-shrink: 0; }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-user:hover { background: rgba(255, 255, 255, 0.1); }
+        .sidebar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .sidebar-user-info { flex: 1; overflow: hidden; }
+        .sidebar-user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-user-role { font-size: 0.78rem; color: #94A3B8; }
+
+        /* ── Mobile Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        /* ── Main Area ── */
+        .main-wrapper {
+            flex: 1;
+            width: calc(100% - 240px);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-page);
+            position: relative;
+        }
+        .main-wrapper::-webkit-scrollbar { width: 6px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* ── Top Header ── */
+        .top-header {
+            padding: 1.25rem 28px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-title-block h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .header-title-block p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-badge-ai {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.95rem;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .header-badge-ai span.pulse {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #2563EB;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+        }
+        .menu-toggle-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        .header-icon-btn:hover {
+            background: #F1F5F9;
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ── Full Width Page Content Container ── */
+        .page-content {
+            padding: 24px 28px 36px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── SECTION 1: TOP GRID (Form 67% + Why Use a Study Plan 33%) ── */
+        .top-planner-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+            gap: 24px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.6rem 1.85rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .app-card:hover {
+            box-shadow: var(--shadow-card);
+        }
+
+        .planner-hero-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.15rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .planner-badge-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+        .planner-hero-text h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-bottom: 0.25rem;
+        }
+        .badge-chip {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid #DBEAFE;
+        }
+        .planner-hero-text p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* Two-Column Form Layout */
+        .form-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 18px;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.45rem;
+        }
+        .form-label-hint {
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .input-group-styled {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon-el {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-control-styled {
+            width: 100%;
+            height: 48px;
+            padding: 0 1rem 0 2.9rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-input);
+            background: var(--bg-card);
+            font-size: 0.94rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .input-control-styled::placeholder {
+            color: #94A3B8;
+        }
+        .input-control-styled:hover {
+            border-color: var(--border-hover);
+        }
+        .input-control-styled:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Dynamic Preparation Period Preview Banner */
+        .date-preview-banner {
+            display: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-input);
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            color: #1E40AF;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            gap: 0.5rem;
+            animation: fadeIn 0.2s ease;
+        }
+        .date-preview-banner.warning {
+            background: #FEF2F2;
+            border-color: #FECACA;
+            color: #DC2626;
+        }
+
+        /* Document Grounding Selector */
+        .doc-grounding-box {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-input);
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.15rem;
+            background: var(--bg-page);
+        }
+        .doc-grounding-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+        .doc-grounding-title {
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .doc-grounding-sub {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+        .doc-list-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 0.65rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .doc-check-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .doc-check-chip:hover {
+            border-color: var(--primary-blue);
+        }
+        .doc-check-chip.selected {
+            background: #EFF6FF;
+            border-color: #93C5FD;
+            color: #1E40AF;
+            font-weight: 600;
+        }
+
+        /* 50px Prominent CTA Button */
+        .btn-generate-planner {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-input);
+            font-size: 1.02rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.65rem;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+            transition: all 0.2s ease;
+            letter-spacing: -0.01em;
+        }
+        .btn-generate-planner:hover {
+            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.38);
+        }
+        .btn-generate-planner:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Right Column: Why Use a Study Plan? */
+        .why-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.35rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .why-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .why-card-title {
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .why-card-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .checklist-ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.15s ease;
+        }
+        .check-circle-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .pro-tip-box {
+            margin-top: auto;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-border);
+            border-radius: 12px;
+            padding: 0.95rem 1.1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .pro-tip-text {
+            font-size: 0.82rem;
+            color: #1E40AF;
+            line-height: 1.45;
+        }
+
+        /* ── SECTION 2: MY STUDY PLANS ── */
+        .saved-plans-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.35rem 1.65rem;
+            box-shadow: var(--shadow-subtle);
+        }
+        .section-heading-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section-heading-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .section-heading-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .section-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+        .plans-pill-badge {
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid #DBEAFE;
+        }
+
+        .plans-empty-card {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 1.25rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 460px;
+            min-height: 195px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .plans-empty-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-subtle);
+        }
+        .plans-empty-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .plans-empty-desc {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            max-width: 330px;
+        }
+        .btn-empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.35rem;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: var(--radius-input);
+            font-weight: 600;
+            font-size: 0.88rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s;
+        }
+
+        #plans-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 18px;
+        }
+        .plan-item-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.35rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1.15rem;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.2s ease;
+        }
+        .plan-item-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-card);
+            transform: translateY(-2px);
+        }
+        .plan-item-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+        }
+        .plan-item-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #FEF3C7;
+            color: #D97706;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .plan-item-meta { flex: 1; }
+        .plan-item-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+        .plan-item-date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            color: #1E40AF;
+            background: #EFF6FF;
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid #DBEAFE;
+            font-weight: 600;
+        }
+        .grounded-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: #F0FDF4;
+            color: #166534;
+            border: 1px solid #BBF7D0;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .plan-subject-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 0.75rem;
+        }
+        .subject-pill {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .plan-progress-bar-wrap {
+            margin-top: 0.85rem;
+        }
+        .plan-progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .plan-progress-track {
+            height: 6px;
+            background: var(--bg-page);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .plan-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+        .plan-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .plan-footer-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .btn-view-schedule {
+            padding: 0.55rem 1.15rem;
+            border-radius: var(--radius-input);
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .btn-view-schedule:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* ── Active Schedule View ── */
+        .plan-view-container {
+            max-width: 980px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .back-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.35rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-input);
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: all 0.15s;
+            box-shadow: var(--shadow-subtle);
+        }
+        .back-nav-btn:hover {
+            background: var(--bg-page);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Polished Plan Hero Banner */
+        .plan-hero-banner {
+            background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 50%, #2563EB 100%);
+            color: white;
+            border-radius: var(--radius-card);
+            padding: 2rem 2.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        .plan-hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .plan-hero-left {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        .plan-banner-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .plan-hero-banner h2 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.35rem;
+        }
+        .countdown-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.22);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            backdrop-filter: blur(4px);
+        }
+        .btn-regenerate-schedule {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.95rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: all 0.15s;
+        }
+        .btn-regenerate-schedule:hover {
+            background: rgba(255, 255, 255, 0.32);
+            transform: translateY(-1px);
+        }
+
+        /* Stats Strip Inside Banner */
+        .plan-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.18);
+            border-radius: 12px;
+            padding: 0.85rem 1.25rem;
+        }
+        .plan-stat-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .plan-stat-label {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+        }
+        .plan-stat-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        /* Plan Controls & Filters Bar */
+        .plan-controls-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 0.9rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-subtle);
+        }
+        .plan-filter-tabs {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .filter-tab-btn {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        .btn-toggle-all {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: all 0.15s;
+        }
+        .btn-toggle-all:hover {
+            background: var(--bg-page);
+            color: var(--text-primary);
+        }
+
+        /* Day Accordion Card */
+        .plan-day-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            margin-bottom: 1.15rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-subtle);
+            transition: border-color 0.15s;
+        }
+        .plan-day-header {
+            padding: 1.1rem 1.5rem;
+            background: var(--bg-page);
+            font-weight: 700;
+            font-size: 0.96rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .plan-day-header:hover {
+            background: var(--border-color);
+        }
+        .plan-day-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .day-status-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #EFF6FF;
+            color: #1E40AF;
+            border: 1px solid #BFDBFE;
+        }
+        .day-status-pill.today {
+            background: #FEF3C7;
+            color: #92400E;
+            border-color: #FDE68A;
+        }
+        .day-status-pill.completed {
+            background: #ECFDF5;
+            color: #065F46;
+            border-color: #A7F3D0;
+        }
+        .plan-day-header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: var(--text-secondary);
+            font-size: 0.84rem;
+        }
+
+        /* Task Row */
+        .plan-task-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.15rem;
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.15s;
+        }
+        .plan-task-row:last-child { border-bottom: none; }
+        .plan-task-row:hover { background: var(--bg-page); }
+        .task-checkbox-styled {
+            width: 1.35rem;
+            height: 1.35rem;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+            margin-top: 0.2rem;
+            flex-shrink: 0;
+        }
+        .task-content-col { flex: 1; min-width: 0; }
+        .task-title-line {
+            font-weight: 600;
+            font-size: 0.98rem;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .task-subject-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: #EFF6FF;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #DBEAFE;
+        }
+        .task-type-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-page);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .task-priority-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .priority-high {
+            background: #FEF2F2;
+            color: #DC2626;
+            border: 1px solid #FECACA;
+        }
+        .priority-medium {
+            background: #EFF6FF;
+            color: #2563EB;
+            border: 1px solid #BFDBFE;
+        }
+        .priority-low {
+            background: var(--bg-page);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .task-desc-line {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .task-completed .task-title-line {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        .task-completed .task-subject-tag {
+            opacity: 0.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .top-planner-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 1.25rem 20px; }
+            .page-content { padding: 20px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .main-wrapper {
+                width: 100%;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+            .menu-toggle-btn {
+                display: flex;
+            }
+            .form-grid-2x2 { grid-template-columns: 1fr; }
+            .top-header { padding: 1rem 1rem; }
+            .page-content { padding: 1rem; }
+            .app-card { padding: 1.25rem; }
+            #plans-list { grid-template-columns: 1fr; }
+            .plan-stats-strip { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; width: 100%; height: 100%;">
+        <!-- Sidebar Backdrop for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1>Study Planner</h1>
+                        <p>Build a personalized, document-aware study schedule for your exact preparation window</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-badge-ai">
+                        <span class="pulse"></span>
+                        Adaptive Scheduling Engine
+                    </div>
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <div class="header-avatar" id="header-user-avatar" style="cursor: pointer;" onclick="window.location.href='profile.html'">K</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Main Planner View -->
+                <div id="main-view" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+                    <!-- SECTION 1: TWO COLUMN WORKSPACE (Form 67% / Why Use a Study Plan 33%) -->
+                    <div class="top-planner-grid">
+                        <!-- Left Column: Create a Study Plan Card -->
+                        <div class="app-card">
+                            <div>
+                                <div class="planner-hero-header">
+                                    <div class="planner-badge-icon">
+                                        <i data-lucide="calendar" style="width: 26px; height: 26px;"></i>
+                                    </div>
+                                    <div class="planner-hero-text">
+                                        <h2>
+                                            Create a Study Plan
+                                            <span class="badge-chip">Dynamic Schedule Engine</span>
+                                        </h2>
+                                        <p>Set your exam date and study hours. Your plan is strictly tailored to the exact preparation window available.</p>
+                                    </div>
+                                </div>
+
+                                <form id="generate-form">
+                                    <!-- 2x2 Form Layout with 48px Fields -->
+                                    <div class="form-grid-2x2">
+                                        <!-- Exam Name -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="examName">
+                                                <span>Exam Name <span style="color: #EF4444;">*</span></span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="award" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="text" id="examName" class="input-control-styled" placeholder="e.g. Operating Systems Final, GATE, Midterm" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Exam Date -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="examDate">
+                                                <span>Exam Date <span style="color: #EF4444;">*</span></span>
+                                                <span class="form-label-hint" id="exam-date-hint">Select upcoming date</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="calendar" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="date" id="examDate" class="input-control-styled" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Subjects -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="subjects">
+                                                <span>Subjects <span style="color: #EF4444;">*</span></span>
+                                                <span class="form-label-hint">Comma separated</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="book-open" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="text" id="subjects" class="input-control-styled" placeholder="e.g. Operating Systems, Computer Networks" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Daily Study Time -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="dailyTime">
+                                                <span>Daily Study Time <span style="color: #EF4444;">*</span></span>
+                                                <span class="form-label-hint">Hours per day</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="clock" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="number" id="dailyTime" class="input-control-styled" value="2" min="1" max="12" step="0.5" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Live Dynamic Preparation Period Calculation Banner -->
+                                    <div id="date-preview-banner" class="date-preview-banner">
+                                        <i data-lucide="info" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+                                        <span id="date-preview-text"></span>
+                                    </div>
+
+                                    <!-- Include Exam Day Checkbox -->
+                                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+                                        <input type="checkbox" id="includeExamDay" style="width: 16px; height: 16px; accent-color: var(--primary-blue); cursor: pointer;">
+                                        <label for="includeExamDay" style="cursor: pointer; user-select: none;">
+                                            Include the exam day as a study day (Default: tasks end the day before the exam)
+                                        </label>
+                                    </div>
+
+                                    <!-- Document Grounding Section (Optional Course Materials) -->
+                                    <div class="doc-grounding-box" id="doc-grounding-container" style="display: none;">
+                                        <div class="doc-grounding-header" id="doc-toggle-header">
+                                            <div class="doc-grounding-title">
+                                                <i data-lucide="file-check-2" style="width: 16px; height: 16px; color: var(--primary-blue);"></i>
+                                                <span>Ground plan in course materials (Optional)</span>
+                                            </div>
+                                            <span class="doc-grounding-sub" id="doc-count-sub">0 available</span>
+                                        </div>
+                                        <div class="doc-list-chips" id="doc-chips-list">
+                                            <!-- Dynamically populated from /documents -->
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn-generate-planner" id="generate-btn">
+                                        <i data-lucide="calendar-plus" style="width: 18px; height: 18px;"></i> Generate Study Plan &rarr;
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Why Use a Study Plan? Card -->
+                        <div class="app-card">
+                            <div>
+                                <div class="why-card-header">
+                                    <div class="why-card-icon">
+                                        <i data-lucide="check-circle-2" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="why-card-title">Adaptive Pacing</h3>
+                                        <p class="why-card-sub">Dynamic learning strategy</p>
+                                    </div>
+                                </div>
+                                <ul class="checklist-ul">
+                                    <li class="checklist-item">
+                                        <div class="check-circle-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+                                        <span><strong>Exact Timeline:</strong> Calculates your preparation period dynamically without hardcoded limits.</span>
+                                    </li>
+                                    <li class="checklist-item">
+                                        <div class="check-circle-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+                                        <span><strong>Document Grounded:</strong> Integrates uploaded syllabi and notes to structure realistic chapters.</span>
+                                    </li>
+                                    <li class="checklist-item">
+                                        <div class="check-circle-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+                                        <span><strong>Capped Daily Load:</strong> Ensures daily tasks never exceed your study hours for sustainable progress.</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="pro-tip-box">
+                                <i data-lucide="lightbulb" style="width: 20px; height: 20px; color: #2563EB; flex-shrink: 0; margin-top: 1px;"></i>
+                                <div class="pro-tip-text">
+                                    <strong>Prep Strategy:</strong> 2-day plans emphasize formula drills & high-yield reviews; 6+ day plans balance concept mastery with mock practice.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: MY STUDY PLANS -->
+                    <div class="saved-plans-section">
+                        <div class="section-heading-row">
+                            <div class="section-heading-left">
+                                <div class="section-heading-icon">
+                                    <i data-lucide="calendar-check" style="width: 20px; height: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h2 class="section-title">My Study Plans</h2>
+                                    <p class="section-subtitle">Track your milestones, completed hours, and countdown schedules</p>
+                                </div>
+                            </div>
+                            <div class="plans-pill-badge" id="plans-count-badge">Active Plans</div>
+                        </div>
+
+                        <!-- Plans List or Compact Empty State -->
+                        <div id="plans-list">
+                            <!-- Populated dynamically by loadPlans() -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Plan View (Timeline / Calendar) -->
+                <div class="plan-view-container" id="active-plan-view" style="display: none;">
+                    <button id="back-btn" class="back-nav-btn">
+                        <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> Back to Planner Overview
+                    </button>
+                    <div id="plan-content">
+                        <!-- Populated by showPlan() -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reusable Sidebar injection and Page Logic -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">K</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        let currentPlan = null;
+        let allPlans = [];
+        let userDocuments = [];
+        let selectedDocIds = new Set();
+        let currentFilter = 'all'; // 'all', 'pending', 'completed'
+        let allExpanded = true;
+
+        // Local date helpers to eliminate timezone offset drift
+        function formatLocalDateStr(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function parseLocalDateStr(str) {
+            if (!str) return null;
+            if (str instanceof Date) {
+                if (isNaN(str.getTime())) return null;
+                return new Date(str.getFullYear(), str.getMonth(), str.getDate(), 0, 0, 0, 0);
+            }
+            const s = String(str).trim();
+            // 1. If exact YYYY-MM-DD string without time/timezone
+            if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+                const [year, month, day] = s.split('-').map(Number);
+                return new Date(year, month - 1, day, 0, 0, 0, 0);
+            }
+            // 2. If ISO string (e.g. 2026-10-14T18:30:00.000Z), parse into local time then zero the hours
+            const d = new Date(s);
+            if (isNaN(d.getTime())) return null;
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+        }
+
+        function formatFriendly(dInput) {
+            const d = parseLocalDateStr(dInput);
+            if (!d || isNaN(d.getTime())) return '';
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function formatShortDate(dInput) {
+            const d = parseLocalDateStr(dInput);
+            if (!d || isNaN(d.getTime())) return '';
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderSidebar();
+
+            // Mobile menu toggle
+            const menuBtn = document.getElementById('menu-toggle-btn');
+            const sidebarEl = document.getElementById('sidebar-container');
+            const overlayEl = document.getElementById('sidebar-overlay');
+            if (menuBtn && sidebarEl && overlayEl) {
+                menuBtn.addEventListener('click', () => {
+                    sidebarEl.classList.toggle('mobile-open');
+                    overlayEl.classList.toggle('mobile-open');
+                });
+                overlayEl.addEventListener('click', () => {
+                    sidebarEl.classList.remove('mobile-open');
+                    overlayEl.classList.remove('mobile-open');
+                });
+            }
+
+            const user = await checkAuth();
+            if (user) {
+                const nameEl = document.getElementById('sidebar-user-name');
+                const initialEl = document.getElementById('sidebar-user-initial');
+                const headerInitialEl = document.getElementById('header-user-avatar');
+                if (nameEl) nameEl.innerText = user.name;
+                if (initialEl) initialEl.innerText = user.name.charAt(0).toUpperCase();
+                if (headerInitialEl) headerInitialEl.innerText = user.name.charAt(0).toUpperCase();
+            }
+
+            // Set minimum exam date to tomorrow to prevent selecting today or past dates
+            const now = new Date();
+            const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            const examDateInput = document.getElementById('examDate');
+            if (examDateInput) {
+                examDateInput.min = formatLocalDateStr(tomorrow);
+                examDateInput.addEventListener('input', updateDatePreview);
+            }
+
+            const includeExamDayCheck = document.getElementById('includeExamDay');
+            if (includeExamDayCheck) {
+                includeExamDayCheck.addEventListener('change', updateDatePreview);
+            }
+
+            // Load user documents for optional grounding
+            loadUserDocuments();
+
+            // Load saved plans
+            loadPlans();
+
+            // Form submission
+            document.getElementById('generate-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('generate-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="loader" style="width: 20px; animation: spin 1s linear infinite;"></i> Generating Plan...';
+                btn.disabled = true;
+
+                const examDateVal = document.getElementById('examDate').value;
+                const currentDateVal = formatLocalDateStr(new Date());
+
+                const payload = {
+                    examName: document.getElementById('examName').value,
+                    examDate: examDateVal,
+                    currentDate: currentDateVal,
+                    includeExamDay: document.getElementById('includeExamDay').checked,
+                    subjects: document.getElementById('subjects').value.split(',').map(s => s.trim()).filter(Boolean),
+                    dailyStudyTime: parseFloat(document.getElementById('dailyTime').value) * 60,
+                    documentIds: Array.from(selectedDocIds)
+                };
+
+                try {
+                    const res = await apiFetch('/planner/generate', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (res.success) {
+                        loadPlans();
+                        showPlan(res.data);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert(err.message || 'Error generating study plan. Please verify the exam date and try again.');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            });
+
+            document.getElementById('back-btn').addEventListener('click', () => {
+                document.getElementById('active-plan-view').style.display = 'none';
+                document.getElementById('main-view').style.display = 'flex';
+                loadPlans();
+            });
+        });
+
+        function updateDatePreview() {
+            const input = document.getElementById('examDate');
+            const banner = document.getElementById('date-preview-banner');
+            const textEl = document.getElementById('date-preview-text');
+            const includeExamDay = document.getElementById('includeExamDay')?.checked || false;
+
+            if (!input.value) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            const today = new Date();
+            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const examMidnight = parseLocalDateStr(input.value);
+
+            const diffMs = examMidnight.getTime() - todayMidnight.getTime();
+            const daysUntilExam = Math.round(diffMs / 86400000);
+
+            if (daysUntilExam < 1) {
+                banner.className = 'date-preview-banner warning';
+                textEl.innerText = 'Exam date must be in the future (at least 1 day ahead to allow preparation).';
+                banner.style.display = 'flex';
+                lucide.createIcons();
+                return;
+            }
+
+            const totalPrepDays = includeExamDay ? (daysUntilExam + 1) : daysUntilExam;
+            const startDateStr = formatShortDate(todayMidnight);
+            const endDateMidnight = new Date(todayMidnight.getTime() + (totalPrepDays - 1) * 86400000);
+            const endDateStr = formatShortDate(endDateMidnight);
+            const examDateStr = formatShortDate(examMidnight);
+
+            banner.className = 'date-preview-banner';
+            textEl.innerHTML = `<strong>${totalPrepDays} preparation days available</strong> (${startDateStr} to ${endDateStr}). Exam is on <strong>${examDateStr}</strong>.`;
+            banner.style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        async function loadUserDocuments() {
+            try {
+                const res = await apiFetch('/documents');
+                if (res.success && res.data && res.data.length > 0) {
+                    userDocuments = res.data.filter(d => d.status === 'INDEXED');
+                    if (userDocuments.length > 0) {
+                        const container = document.getElementById('doc-grounding-container');
+                        const sub = document.getElementById('doc-count-sub');
+                        const chips = document.getElementById('doc-chips-list');
+                        
+                        sub.innerText = `${userDocuments.length} material(s) ready`;
+                        chips.innerHTML = userDocuments.map(doc => `
+                            <div class="doc-check-chip" id="doc-chip-${doc._id}" onclick="window.toggleDocSelect('${doc._id}')">
+                                <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
+                                <span>${doc.originalName || doc.filename}</span>
+                                <span style="opacity: 0.6; font-size: 0.72rem;">(${doc.subject || 'General'})</span>
+                            </div>
+                        `).join('');
+
+                        container.style.display = 'block';
+                        lucide.createIcons();
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not load documents for planner:', err.message);
+            }
+        }
+
+        window.toggleDocSelect = (docId) => {
+            const chip = document.getElementById(`doc-chip-${docId}`);
+            if (selectedDocIds.has(docId)) {
+                selectedDocIds.delete(docId);
+                chip.classList.remove('selected');
+            } else {
+                selectedDocIds.add(docId);
+                chip.classList.add('selected');
+            }
+        };
+
+        async function loadPlans() {
+            try {
+                const res = await apiFetch('/planner');
+                const list = document.getElementById('plans-list');
+                const badge = document.getElementById('plans-count-badge');
+                
+                if (res.data && res.data.length > 0) {
+                    allPlans = res.data;
+                    if (badge) badge.innerText = `${allPlans.length} Active Plans`;
+
+                    list.innerHTML = res.data.map(p => {
+                        const today = new Date();
+                        const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        const examDate = parseLocalDateStr(p.examDateString || p.examDate);
+                        
+                        const daysLeft = Math.round((examDate.getTime() - todayMidnight.getTime()) / 86400000);
+                        const daysLabel = daysLeft > 0 ? `${daysLeft} days left` : (daysLeft === 0 ? 'Exam Today' : 'Exam Concluded');
+                        
+                        let totalTasks = 0;
+                        let doneTasks = 0;
+                        let totalMinutes = 0;
+                        let completedMinutes = 0;
+
+                        if (Array.isArray(p.plan)) {
+                            p.plan.forEach(d => {
+                                if (Array.isArray(d.tasks)) {
+                                    d.tasks.forEach(t => {
+                                        totalTasks++;
+                                        const dur = t.duration || 30;
+                                        totalMinutes += dur;
+                                        if (t.isCompleted) {
+                                            doneTasks++;
+                                            completedMinutes += dur;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+                        const dailyHours = p.dailyStudyTime ? (p.dailyStudyTime / 60) : 2;
+                        const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+                        const prepDays = p.totalPreparationDays || (p.plan ? p.plan.length : 1);
+
+                        const prepWindowStr = p.startDateString && p.endDateString
+                            ? `${formatShortDate(p.startDateString)} &mdash; ${formatShortDate(p.endDateString)} (${prepDays} days)`
+                            : `${prepDays} preparation days`;
+
+                        return `
+                            <div class="plan-item-card">
+                                <div>
+                                    <div class="plan-item-top" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div style="display: flex; gap: 0.85rem; align-items: flex-start;">
+                                            <div class="plan-item-icon">
+                                                <i data-lucide="calendar" style="width: 22px; height: 22px;"></i>
+                                            </div>
+                                            <div class="plan-item-meta">
+                                                <div class="plan-item-name">${p.examName}</div>
+                                                <div class="plan-item-date-badge">
+                                                    <i data-lucide="target" style="width: 13px; height: 13px;"></i>
+                                                    Exam: ${formatShortDate(p.examDateString || p.examDate)}
+                                                </div>
+                                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 3px;">
+                                                    <i data-lucide="calendar-range" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"></i>
+                                                    ${prepWindowStr}
+                                                </div>
+                                                ${p.isDocumentGrounded ? `
+                                                    <div class="grounded-badge">
+                                                        <i data-lucide="check" style="width: 11px; height: 11px;"></i>
+                                                        Course Document Grounded
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                        <button title="Discard Schedule" onclick="window.discardPlan('${p._id}')" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: 0.15s;" onmouseover="this.style.color='#EF4444'" onmouseout="this.style.color='var(--text-muted)'">
+                                            <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    ${p.subjects && p.subjects.length > 0 ? `
+                                        <div class="plan-subject-badges">
+                                            ${p.subjects.map(s => `<span class="subject-pill">${s}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+
+                                    <div class="plan-progress-bar-wrap">
+                                        <div class="plan-progress-header">
+                                            <span>Progress: ${doneTasks}/${totalTasks} Tasks (${Math.round((completedMinutes/60)*10)/10}/${totalHours} hrs)</span>
+                                            <span>${pct}%</span>
+                                        </div>
+                                        <div class="plan-progress-track">
+                                            <div class="plan-progress-fill" style="width: ${pct}%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="plan-card-footer">
+                                    <div class="plan-footer-sub">
+                                        <div><i data-lucide="hourglass" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i> ${daysLabel}</div>
+                                        <div><i data-lucide="clock" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle;"></i> ${dailyHours}h daily &bull; ${totalHours}h total</div>
+                                    </div>
+                                    <button class="btn-view-schedule" onclick="window.viewPlanById('${p._id}')">
+                                        View Schedule &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    if (badge) badge.innerText = `0 Plans`;
+                    list.innerHTML = `
+                        <div class="plans-empty-card" style="grid-column: 1 / -1;">
+                            <div class="plans-empty-icon">
+                                <i data-lucide="calendar" style="width: 26px; height: 26px;"></i>
+                            </div>
+                            <h3 class="plans-empty-title">No study plans yet</h3>
+                            <p class="plans-empty-desc">Create your first personalized study schedule tailored to your upcoming exam.</p>
+                            <button class="btn-empty-action" onclick="document.getElementById('examName').focus(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                                <i data-lucide="calendar-plus" style="width: 16px; height: 16px;"></i> Create Study Plan
+                            </button>
+                        </div>
+                    `;
+                }
+                lucide.createIcons();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        window.viewPlanById = (id) => {
+            const p = allPlans.find(x => x._id === id);
+            if (p) showPlan(p);
+        };
+
+        function showPlan(plan) {
+            currentPlan = plan;
+            currentFilter = 'all';
+            allExpanded = true;
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('active-plan-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            renderActivePlan();
+        }
+
+        function renderActivePlan() {
+            if (!currentPlan) return;
+            const container = document.getElementById('plan-content');
+            
+            const today = new Date();
+            const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+            const examDate = parseLocalDateStr(currentPlan.examDateString || currentPlan.examDate);
+            const daysLeft = Math.round((examDate.getTime() - todayMidnight.getTime()) / 86400000);
+            const daysLabel = daysLeft > 0 ? `${daysLeft} Days Remaining` : (daysLeft === 0 ? 'Exam is Today!' : 'Exam Concluded');
+
+            let totalTasks = 0;
+            let completedTasks = 0;
+            let totalMinutes = 0;
+            let completedMinutes = 0;
+
+            if (Array.isArray(currentPlan.plan)) {
+                currentPlan.plan.forEach(day => {
+                    if (Array.isArray(day.tasks)) {
+                        day.tasks.forEach(t => {
+                            totalTasks++;
+                            const dur = t.duration || 30;
+                            totalMinutes += dur;
+                            if (t.isCompleted) {
+                                completedTasks++;
+                                completedMinutes += dur;
+                            }
+                        });
+                    }
+                });
+            }
+
+            const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            const totalPlannedHours = Math.round((totalMinutes / 60) * 10) / 10;
+            const completedHours = Math.round((completedMinutes / 60) * 10) / 10;
+            const dailyHours = currentPlan.dailyStudyTime ? Math.round((currentPlan.dailyStudyTime / 60) * 10) / 10 : 2;
+
+            // Defensive calculation of preparation range
+            const startDateObj = parseLocalDateStr(currentPlan.startDateString || currentPlan.startDate || currentPlan.createdAt || todayMidnight);
+            const defaultEndDateObj = currentPlan.includeExamDay 
+                ? examDate 
+                : new Date(examDate.getTime() - 86400000);
+            const endDateObj = parseLocalDateStr(currentPlan.endDateString || currentPlan.endDate || defaultEndDateObj);
+
+            const computedDays = Math.max(1, Math.round((endDateObj.getTime() - startDateObj.getTime()) / 86400000) + 1);
+            const prepDays = (currentPlan.totalPreparationDays && currentPlan.totalPreparationDays > 1) 
+                ? currentPlan.totalPreparationDays 
+                : ((currentPlan.plan && currentPlan.plan.length > 1) ? currentPlan.plan.length : computedDays);
+
+            const startDateFormatted = formatFriendly(startDateObj);
+            const endDateFormatted = formatFriendly(endDateObj);
+            const examDateFormatted = formatFriendly(examDate);
+
+            let html = `
+                <!-- Plan Hero Banner -->
+                <div class="plan-hero-banner">
+                    <div class="plan-hero-top">
+                        <div class="plan-hero-left">
+                            <div class="plan-banner-icon">
+                                <i data-lucide="calendar-check" style="width: 32px; height: 32px; color: white;"></i>
+                            </div>
+                            <div>
+                                <h2>${currentPlan.examName}</h2>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 4px;">
+                                    ${(currentPlan.subjects || []).map(s => `<span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">${s}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <div class="countdown-chip">
+                                <i data-lucide="clock" style="width: 15px; height: 15px;"></i>
+                                ${daysLabel}
+                            </div>
+                            <button class="btn-regenerate-schedule" id="btn-regen-plan" onclick="window.regenerateCurrentPlan()" title="Regenerate full schedule across all preparation days">
+                                <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Regenerate Schedule
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preparation Dates Strip -->
+                    <div style="font-size: 0.92rem; opacity: 0.95; line-height: 1.5; background: rgba(0,0,0,0.12); padding: 0.65rem 1rem; border-radius: 8px;">
+                        <div><strong>Preparation Window:</strong> ${startDateFormatted} &rarr; ${endDateFormatted} (<strong>${prepDays} Preparation Days</strong>)</div>
+                        <div><strong>Target Exam Date:</strong> ${examDateFormatted}</div>
+                        ${currentPlan.groundingNotes ? `<div style="font-size: 0.82rem; opacity: 0.88; margin-top: 3px;"><strong>Grounded Status:</strong> ${currentPlan.groundingNotes}</div>` : ''}
+                    </div>
+
+                    <!-- Statistics Strip -->
+                    <div class="plan-stats-strip">
+                        <div class="plan-stat-col">
+                            <span class="plan-stat-label">Daily Study Target</span>
+                            <span class="plan-stat-val">${dailyHours} hrs / day</span>
+                        </div>
+                        <div class="plan-stat-col">
+                            <span class="plan-stat-label">Total Planned Time</span>
+                            <span class="plan-stat-val">${totalPlannedHours} hrs</span>
+                        </div>
+                        <div class="plan-stat-col">
+                            <span class="plan-stat-label">Completed Time</span>
+                            <span class="plan-stat-val" id="banner-completed-hours">${completedHours} hrs (${pct}%)</span>
+                        </div>
+                        <div class="plan-stat-col">
+                            <span class="plan-stat-label">Tasks Finished</span>
+                            <span class="plan-stat-val" id="banner-completed-tasks">${completedTasks} / ${totalTasks}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Controls & Filters Bar -->
+                <div class="plan-controls-bar">
+                    <div class="plan-filter-tabs">
+                        <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-right: 4px;">FILTER:</span>
+                        <button class="filter-tab-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="window.setPlanFilter('all')">All Tasks (${totalTasks})</button>
+                        <button class="filter-tab-btn ${currentFilter === 'pending' ? 'active' : ''}" onclick="window.setPlanFilter('pending')">Pending (${totalTasks - completedTasks})</button>
+                        <button class="filter-tab-btn ${currentFilter === 'completed' ? 'active' : ''}" onclick="window.setPlanFilter('completed')">Completed (${completedTasks})</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-toggle-all" onclick="window.toggleAllDays()">
+                            <i data-lucide="chevrons-up-down" style="width: 14px; height: 14px;"></i>
+                            <span id="toggle-all-label">Collapse All</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Day Cards
+            if (Array.isArray(currentPlan.plan)) {
+                currentPlan.plan.forEach((day, dayIndex) => {
+                    const expectedDayDate = new Date(startDateObj.getTime() + dayIndex * 86400000);
+                    const dayDate = parseLocalDateStr(day.dateString) || expectedDayDate;
+                    const dayFormatted = formatFriendly(dayDate);
+                    
+                    const isToday = formatLocalDateStr(dayDate) === formatLocalDateStr(today);
+                    const dayTasks = Array.isArray(day.tasks) ? day.tasks : [];
+                    
+                    const filteredTasks = dayTasks.filter((t, tIdx) => {
+                        if (currentFilter === 'pending') return !t.isCompleted;
+                        if (currentFilter === 'completed') return t.isCompleted;
+                        return true;
+                    });
+
+                    const dayDone = dayTasks.filter(t => t.isCompleted).length;
+                    const dayMinutes = dayTasks.reduce((acc, t) => acc + (t.duration || 0), 0);
+                    const dayHours = Math.round((dayMinutes / 60) * 10) / 10;
+                    const isDayFullyDone = dayTasks.length > 0 && dayDone === dayTasks.length;
+
+                    let statusBadge = '';
+                    if (isDayFullyDone) statusBadge = `<span class="day-status-pill completed">All Completed</span>`;
+                    else if (isToday) statusBadge = `<span class="day-status-pill today">Today's Focus</span>`;
+
+                    html += `
+                        <div class="plan-day-card" id="day-card-${dayIndex}">
+                            <div class="plan-day-header" onclick="window.toggleDayCard(${dayIndex})">
+                                <div class="plan-day-header-left">
+                                    <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--primary-blue);"></i>
+                                    <span>Day ${day.dayNumber || (dayIndex + 1)} &mdash; ${dayFormatted}</span>
+                                    ${statusBadge}
+                                </div>
+                                <div class="plan-day-header-right">
+                                    <span>${dayDone}/${dayTasks.length} Done &bull; ${dayHours} hrs</span>
+                                    <i data-lucide="chevron-down" id="day-chevron-${dayIndex}" style="width: 18px; height: 18px; transition: transform 0.2s;"></i>
+                                </div>
+                            </div>
+                            <div class="plan-day-body" id="day-body-${dayIndex}">
+                    `;
+
+                    if (filteredTasks.length === 0) {
+                        html += `
+                            <div style="padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.86rem; text-align: center;">
+                                No tasks matching current filter in Day ${dayIndex + 1}.
+                            </div>
+                        `;
+                    } else {
+                        dayTasks.forEach((task, taskIndex) => {
+                            // Check if this task matches the filter
+                            if (currentFilter === 'pending' && task.isCompleted) return;
+                            if (currentFilter === 'completed' && !task.isCompleted) return;
+
+                            const isCompleted = task.isCompleted;
+                            const priorityClass = (task.priority || 'Medium').toLowerCase() === 'high' 
+                                ? 'priority-high' 
+                                : ((task.priority || 'Medium').toLowerCase() === 'low' ? 'priority-low' : 'priority-medium');
+
+                            let taskIcon = 'book-open';
+                            if (task.taskType === 'Practice questions') taskIcon = 'check-square';
+                            else if (task.taskType === 'Flashcards') taskIcon = 'layers';
+                            else if (task.taskType === 'Quizzes') taskIcon = 'help-circle';
+                            else if (task.taskType === 'Mock tests') taskIcon = 'award';
+
+                            html += `
+                                <div class="plan-task-row ${isCompleted ? 'task-completed' : ''}" id="task-${dayIndex}-${taskIndex}">
+                                    <input type="checkbox" class="task-checkbox-styled" 
+                                        ${isCompleted ? 'checked' : ''} 
+                                        onchange="window.toggleTask('${currentPlan._id}', ${dayIndex}, ${taskIndex}, this.checked)">
+                                    <div class="task-content-col">
+                                        <div class="task-title-line">
+                                            <span class="task-subject-tag">${task.subject || 'General'}</span>
+                                            <span class="task-priority-badge ${priorityClass}">${task.priority || 'Medium'}</span>
+                                            <span class="task-type-badge">
+                                                <i data-lucide="${taskIcon}" style="width: 12px; height: 12px;"></i>
+                                                ${task.taskType || 'Revision'}
+                                            </span>
+                                            <span style="font-weight: 700; color: var(--text-primary); margin-left: 2px;">
+                                                ${task.title || task.topic}
+                                            </span>
+                                            <span style="color: var(--text-muted); font-size: 0.82rem; font-weight: 600; margin-left: auto;">
+                                                ⏱️ ${task.duration || 30} mins
+                                            </span>
+                                        </div>
+                                        <div class="task-desc-line">
+                                            <strong>Topic:</strong> ${task.topic || 'Core Curriculum'}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Completion Celebratory Container
+            html += `
+                <div id="plan-finished-container" style="display: ${completedTasks === totalTasks && totalTasks > 0 ? 'block' : 'none'}; text-align: center; margin-top: 2rem; margin-bottom: 2rem; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-card); border: 1px solid var(--border-color); box-shadow: var(--shadow-card);">
+                    <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">🎉</div>
+                    <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.35rem;">Outstanding! All Tasks Finished!</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                        You have completed all planned milestones for this schedule. You are thoroughly prepared for your exam!
+                    </p>
+                    <button class="btn-view-schedule" style="background: #EF4444;" onclick="window.discardPlan('${currentPlan._id}')">
+                        <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i> Discard Schedule
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        window.setPlanFilter = (filter) => {
+            currentFilter = filter;
+            renderActivePlan();
+        };
+
+        window.toggleDayCard = (dayIndex) => {
+            const body = document.getElementById(`day-body-${dayIndex}`);
+            const chevron = document.getElementById(`day-chevron-${dayIndex}`);
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            } else {
+                body.style.display = 'none';
+                if (chevron) chevron.style.transform = 'rotate(-90deg)';
+            }
+        };
+
+        window.toggleAllDays = () => {
+            allExpanded = !allExpanded;
+            const label = document.getElementById('toggle-all-label');
+            if (label) label.innerText = allExpanded ? 'Collapse All' : 'Expand All';
+
+            if (currentPlan && Array.isArray(currentPlan.plan)) {
+                currentPlan.plan.forEach((_, idx) => {
+                    const body = document.getElementById(`day-body-${idx}`);
+                    const chevron = document.getElementById(`day-chevron-${idx}`);
+                    if (body) body.style.display = allExpanded ? 'block' : 'none';
+                    if (chevron) chevron.style.transform = allExpanded ? 'rotate(0deg)' : 'rotate(-90deg)';
+                });
+            }
+        };
+
+        window.discardPlan = async (planId) => {
+            if (!confirm('Are you sure you want to discard this study schedule?')) return;
+            try {
+                const res = await apiFetch('/planner/' + planId, { method: 'DELETE' });
+                if (res.success) {
+                    document.getElementById('active-plan-view').style.display = 'none';
+                    document.getElementById('main-view').style.display = 'flex';
+                    loadPlans();
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Failed to discard schedule.');
+            }
+        };
+
+        window.toggleTask = async (planId, dayIndex, taskIndex, isCompleted) => {
+            const taskDiv = document.getElementById(`task-${dayIndex}-${taskIndex}`);
+            if (taskDiv) {
+                if (isCompleted) taskDiv.classList.add('task-completed');
+                else taskDiv.classList.remove('task-completed');
+            }
+
+            try {
+                if (currentPlan && currentPlan.plan[dayIndex] && currentPlan.plan[dayIndex].tasks[taskIndex]) {
+                    currentPlan.plan[dayIndex].tasks[taskIndex].isCompleted = isCompleted;
+                    
+                    // Update stats
+                    let totalTasks = 0;
+                    let completedTasks = 0;
+                    let totalMinutes = 0;
+                    let completedMinutes = 0;
+                    currentPlan.plan.forEach(day => {
+                        day.tasks.forEach(t => {
+                            totalTasks++;
+                            const dur = t.duration || 30;
+                            totalMinutes += dur;
+                            if (t.isCompleted) {
+                                completedTasks++;
+                                completedMinutes += dur;
+                            }
+                        });
+                    });
+
+                    const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                    const completedHours = Math.round((completedMinutes / 60) * 10) / 10;
+                    
+                    const hoursEl = document.getElementById('banner-completed-hours');
+                    const tasksEl = document.getElementById('banner-completed-tasks');
+                    if (hoursEl) hoursEl.innerText = `${completedHours} hrs (${pct}%)`;
+                    if (tasksEl) tasksEl.innerText = `${completedTasks} / ${totalTasks}`;
+
+                    const finishBox = document.getElementById('plan-finished-container');
+                    if (finishBox) {
+                        finishBox.style.display = (completedTasks === totalTasks && totalTasks > 0) ? 'block' : 'none';
+                    }
+                }
+
+                await apiFetch('/planner/' + planId, {
+                    method: 'PUT',
+                    body: JSON.stringify({ dayIndex, taskIndex, isCompleted })
+                });
+            } catch(e) {
+                console.error('Failed to update task status', e);
+            }
+        };
+
+        window.regenerateCurrentPlan = async () => {
+            if (!currentPlan) return;
+            const prepDays = currentPlan.totalPreparationDays || (currentPlan.plan ? currentPlan.plan.length : 6);
+            if (!confirm(`Regenerate study plan across all ${prepDays} preparation days for "${currentPlan.examName}"?`)) return;
+            
+            const btn = document.getElementById('btn-regen-plan');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i data-lucide="loader" style="width: 14px; animation: spin 1s linear infinite;"></i> Regenerating...';
+                lucide.createIcons();
+            }
+
+            try {
+                const res = await apiFetch(`/planner/${currentPlan._id}/regenerate`, {
+                    method: 'POST',
+                    body: JSON.stringify({ currentDate: formatLocalDateStr(new Date()) })
+                });
+                if (res.success && res.data) {
+                    currentPlan = res.data;
+                    renderActivePlan();
+                    loadPlans();
+                    alert('Study plan successfully regenerated for all preparation days!');
+                }
+            } catch(e) {
+                console.error(e);
+                alert(e.message || 'Failed to regenerate study plan.');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Regenerate Schedule';
+                    lucide.createIcons();
+                }
+            }
+        };
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>

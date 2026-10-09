@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress - Margdarshi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --primary-blue: #2563EB;
+            --primary-hover: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --primary-border: #BFDBFE;
+            --radius-card: 14px;
+            --radius-input: 10px;
+            --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: linear-gradient(180deg, #09132D 0%, #0D1C48 55%, #15358E 100%);
+            color: #94A3B8;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.15rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-brand i { color: #60A5FA; }
+        .sidebar-brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(96, 165, 250, 0.2);
+            color: #93C5FD;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.15s ease;
+        }
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-item.active {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .nav-item i { width: 19px; height: 19px; flex-shrink: 0; }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-user:hover { background: rgba(255, 255, 255, 0.1); }
+        .sidebar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .sidebar-user-info { flex: 1; overflow: hidden; }
+        .sidebar-user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-user-role { font-size: 0.78rem; color: #94A3B8; }
+
+        /* ── Mobile Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        /* ── Main Area ── */
+        .main-wrapper {
+            flex: 1;
+            width: calc(100% - 240px);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-page);
+            position: relative;
+        }
+        .main-wrapper::-webkit-scrollbar { width: 6px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* ── Top Header ── */
+        .top-header {
+            padding: 1.25rem 28px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-title-block h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .header-title-block p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-badge-ai {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.95rem;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .header-badge-ai span.pulse {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+        }
+        .menu-toggle-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        .header-icon-btn:hover {
+            background: #F1F5F9;
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .notif-dot {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            width: 7px;
+            height: 7px;
+            background: #EF4444;
+            border-radius: 50%;
+            border: 1.5px solid white;
+        }
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ── Full Width Page Content Container ── */
+        .page-content {
+            padding: 24px 28px 36px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── ROW 1: 4 LARGE HIGH-IMPACT KPI CARDS ── */
+        .kpi-row-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        .kpi-card-hero {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.35rem 1.5rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 142px;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .kpi-card-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+            border-color: var(--border-hover);
+        }
+        .kpi-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .kpi-icon-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+        }
+        .kpi-icon-pill.blue { background: linear-gradient(135deg, #3B82F6, #1D4ED8); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .kpi-icon-pill.green { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .kpi-icon-pill.orange { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        .kpi-icon-pill.purple { background: linear-gradient(135deg, #8B5CF6, #6D28D9); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2); }
+
+        .kpi-badge-trend {
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .trend-up { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .trend-neutral { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+
+        .kpi-num-large {
+            font-size: 2.15rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+            letter-spacing: -0.025em;
+        }
+        .kpi-label-text {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 3px;
+        }
+        .kpi-sub-context {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── ROW 2: 2-COLUMN BALANCED ANALYTICS (Subject Mastery + Weekly Study Time) ── */
+        .analytics-row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.5rem 1.75rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: var(--shadow-card);
+        }
+
+        .dash-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.15rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .dash-header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .dash-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .dash-header-title {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .dash-header-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Subject Mastery */
+        .mastery-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.15rem;
+            flex: 1;
+            justify-content: center;
+        }
+        .mastery-row-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .mastery-row-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .mastery-subject-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .mastery-pct-pill {
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+        }
+        .pill-blue { background: rgba(37, 99, 235, 0.15); color: #60A5FA; }
+        .pill-green { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+        .pill-orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; }
+        .pill-coral { background: rgba(239, 68, 68, 0.15); color: #F87171; }
+
+        .mastery-bar-track {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .mastery-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fill-blue { background: linear-gradient(90deg, #3B82F6, #2563EB); }
+        .fill-green { background: linear-gradient(90deg, #34D399, #10B981); }
+        .fill-orange { background: linear-gradient(90deg, #FBBF24, #F59E0B); }
+        .fill-coral { background: linear-gradient(90deg, #F87171, #EF4444); }
+
+        /* Weekly Study Time Chart */
+        .chart-top-kpi-bar {
+            display: flex;
+            align-items: center;
+            gap: 1.75rem;
+            margin-bottom: 1rem;
+            padding: 0.65rem 1rem;
+            background: var(--bg-page);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .chart-kpi-block {
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-kpi-lbl {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .chart-kpi-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-stage-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 215px;
+            position: relative;
+            margin-top: auto;
+        }
+        .chart-y-ruler {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            width: 26px;
+        }
+        .chart-dashed-lines {
+            position: absolute;
+            left: 30px;
+            right: 0;
+            top: 0;
+            bottom: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .chart-dash {
+            border-bottom: 1px dashed var(--border-color);
+            width: 100%;
+            height: 0;
+        }
+        .chart-bars-viewport {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-left: 34px;
+            height: 192px;
+            z-index: 2;
+        }
+        .chart-bar-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 100%;
+            gap: 0.55rem;
+            flex: 1;
+        }
+        .chart-bar-pillar {
+            width: 30px;
+            background: linear-gradient(180deg, #3B82F6 0%, #1D4ED8 100%);
+            border-radius: 6px 6px 0 0;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .chart-bar-pillar:hover {
+            background: linear-gradient(180deg, #2563EB 0%, #1E40AF 100%);
+            transform: scaleY(1.04);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+        .chart-day-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* ── ROW 3: 2-COLUMN BALANCED ANALYTICS (Recent Activity + Weekly Goals) ── */
+        .activity-goals-row-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* Recent Activity */
+        .activity-list-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .activity-card-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            transition: all 0.2s ease;
+        }
+        .activity-card-item:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-subtle);
+            transform: translateY(-1px);
+        }
+        .activity-left-group {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .activity-avatar-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .activity-avatar-icon.blue { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .activity-avatar-icon.purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .activity-avatar-icon.green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .activity-heading-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+        .activity-desc-text {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .activity-right-tag {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .activity-time-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .activity-status-pill {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            display: inline-block;
+        }
+
+        /* Study Goals */
+        .goals-progress-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .goal-task-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+        }
+        .goal-check-pill {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .goal-check-pill.pending {
+            background: var(--bg-page);
+            color: var(--text-muted);
+        }
+        .goal-content-body { flex: 1; }
+        .goal-content-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.35rem;
+        }
+        .goal-track-line {
+            height: 7px;
+            background: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .goal-fill-line {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .streak-highlight-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .streak-hero-left {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .streak-badge-emoji {
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+        .streak-title-txt {
+            font-size: 0.94rem;
+            font-weight: 700;
+            color: #FBBF24;
+            line-height: 1.2;
+        }
+        .streak-desc-txt {
+            font-size: 0.78rem;
+            color: #F59E0B;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* ── ROW 4: BOTTOM LEARNING INSIGHTS SECTION ── */
+        .insights-section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.85rem 2rem;
+            box-shadow: var(--shadow-subtle);
+        }
+        .insights-grid-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 1.25rem;
+        }
+        .insight-card-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.15rem 1.35rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+        }
+        .insight-card-item:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-subtle);
+        }
+        .insight-top-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .insight-top-pill.blue { color: #2563EB; }
+        .insight-top-pill.orange { color: #D97706; }
+        .insight-top-pill.green { color: #059669; }
+        .insight-highlight-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+        .insight-body-text {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* Empty States & Dynamic Analytics Elements */
+        .dash-empty-state {
+            padding: 2.2rem 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-card);
+        }
+        .dash-empty-state i {
+            color: #94A3B8;
+            margin-bottom: 0.2rem;
+        }
+        .dash-empty-state-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .dash-empty-state-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            max-width: 340px;
+            line-height: 1.45;
+        }
+        .dash-empty-btn {
+            margin-top: 0.45rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #2563EB;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .dash-empty-btn:hover {
+            background: rgba(37, 99, 235, 0.25);
+            color: #1D4ED8;
+        }
+        .chart-empty-overlay {
+            position: absolute;
+            inset: 0;
+            bottom: 28px;
+            left: 30px;
+            background: var(--bg-card);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            border-radius: 8px;
+            z-index: 5;
+            text-align: center;
+            padding: 1rem;
+        }
+        .chart-empty-overlay-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .chart-empty-overlay-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            max-width: 280px;
+        }
+        .mastery-pct-pill.pill-neutral {
+            background: var(--bg-page);
+            color: var(--text-muted);
+        }
+        .retry-error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.85rem;
+            padding: 3rem 1.5rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .retry-error-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #991B1B;
+        }
+        .retry-error-desc {
+            font-size: 0.85rem;
+            color: #7F1D1D;
+            max-width: 320px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .kpi-row-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .analytics-row-2col { grid-template-columns: 1fr; }
+            .activity-goals-row-2col { grid-template-columns: 1fr; }
+            .insights-grid-3col { grid-template-columns: 1fr; }
+            .top-header { padding: 1.25rem 20px; }
+            .page-content { padding: 20px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .main-wrapper {
+                width: 100%;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+            .menu-toggle-btn {
+                display: flex;
+            }
+            .kpi-row-4 { grid-template-columns: 1fr; }
+            .top-header { padding: 1rem 1rem; }
+            .page-content { padding: 1rem; }
+            .dashboard-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; width: 100%; height: 100%;">
+        <!-- Sidebar Backdrop for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1>My Progress</h1>
+                        <p>Track your learning progress and stay consistent with your goals</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-badge-ai">
+                        <span class="pulse"></span>
+                        Live Analytics Engine
+                    </div>
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <div class="header-avatar" id="header-user-avatar" style="cursor: pointer;" onclick="window.location.href='profile.html'">U</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- ERROR STATE -->
+                <div id="progress-error-container" class="retry-error-container" style="display: none;">
+                    <i data-lucide="alert-circle" style="width: 32px; height: 32px; color: #DC2626;"></i>
+                    <div class="retry-error-title">Unable to load progress data</div>
+                    <div class="retry-error-desc">There was an issue connecting to your study history. Please check your connection and try again.</div>
+                    <button class="dash-empty-btn" id="retry-progress-btn" style="cursor: pointer;">
+                        <i data-lucide="rotate-cw" style="width: 14px; height: 14px;"></i> Retry
+                    </button>
+                </div>
+
+                <!-- MAIN DASHBOARD CONTENT -->
+                <div id="progress-main-content">
+                    <!-- ROW 1: 4 LARGE HIGH-IMPACT KPI CARDS -->
+                    <div class="kpi-row-4" id="stats-container">
+                        <!-- KPI 1: Questions Completed -->
+                        <div class="kpi-card-hero">
+                            <div class="kpi-card-top">
+                                <div class="kpi-icon-pill blue">
+                                    <i data-lucide="layers" style="width: 24px; height: 24px;"></i>
+                                </div>
+                                <span class="kpi-badge-trend trend-neutral" id="kpi-flashcards-trend">Active recall</span>
+                            </div>
+                            <div>
+                                <div class="kpi-num-large" id="kpi-flashcards">0</div>
+                                <div class="kpi-label-text">Questions Completed</div>
+                                <div class="kpi-sub-context" id="kpi-flashcards-sub">Active recall & quiz answers</div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 2: Overall Accuracy -->
+                        <div class="kpi-card-hero">
+                            <div class="kpi-card-top">
+                                <div class="kpi-icon-pill green">
+                                    <i data-lucide="check-circle" style="width: 24px; height: 24px;"></i>
+                                </div>
+                                <span class="kpi-badge-trend trend-neutral" id="kpi-accuracy-trend">No attempts</span>
+                            </div>
+                            <div>
+                                <div class="kpi-num-large" id="kpi-accuracy">0%</div>
+                                <div class="kpi-label-text">Overall Accuracy</div>
+                                <div class="kpi-sub-context" id="kpi-accuracy-sub">Average quiz score across subjects</div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 3: Study Sessions -->
+                        <div class="kpi-card-hero">
+                            <div class="kpi-card-top">
+                                <div class="kpi-icon-pill orange">
+                                    <i data-lucide="calendar" style="width: 24px; height: 24px;"></i>
+                                </div>
+                                <span class="kpi-badge-trend trend-neutral" id="kpi-plans-trend">0 Sessions</span>
+                            </div>
+                            <div>
+                                <div class="kpi-num-large" id="kpi-plans">0</div>
+                                <div class="kpi-label-text">Study Sessions</div>
+                                <div class="kpi-sub-context" id="kpi-plans-sub">Recorded focus study sessions</div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4: Total Study Time -->
+                        <div class="kpi-card-hero">
+                            <div class="kpi-card-top">
+                                <div class="kpi-icon-pill purple">
+                                    <i data-lucide="clock" style="width: 24px; height: 24px;"></i>
+                                </div>
+                                <span class="kpi-badge-trend trend-neutral" id="kpi-time-trend">0 mins</span>
+                            </div>
+                            <div>
+                                <div class="kpi-num-large" id="kpi-time">0.0 hrs</div>
+                                <div class="kpi-label-text">Total Study Time</div>
+                                <div class="kpi-sub-context" id="kpi-time-sub">Cumulative active focus hours</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 2: 2-COLUMN BALANCED ANALYTICS (Subject Mastery + Weekly Study Time Chart) -->
+                    <div class="analytics-row-2col">
+                        <!-- Column 1: Subject Mastery -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon">
+                                            <i data-lucide="layout-grid" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Subject Mastery</h2>
+                                            <p class="dash-header-subtitle">Performance & retention across studied domains</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge-chip blue" id="mastery-count-badge" style="font-size: 0.78rem; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE;">0 Subjects</span>
+                                </div>
+
+                                <div class="mastery-stack" id="subject-performance">
+                                    <!-- Dynamic subject mastery items -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Weekly Study Time High-Impact Bar Chart -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon">
+                                            <i data-lucide="bar-chart-2" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Weekly Study Time</h2>
+                                            <p class="dash-header-subtitle">Daily focus duration recorded across current week</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="chart-top-kpi-bar">
+                                    <div class="chart-kpi-block">
+                                        <span class="chart-kpi-lbl">Total this week</span>
+                                        <span class="chart-kpi-val" id="chart-total-week">0.0 hrs</span>
+                                    </div>
+                                    <div class="chart-kpi-block">
+                                        <span class="chart-kpi-lbl">Daily Average</span>
+                                        <span class="chart-kpi-val" id="chart-daily-avg">0.0 hrs/day</span>
+                                    </div>
+                                    <div class="chart-kpi-block">
+                                        <span class="chart-kpi-lbl">Peak Focus Day</span>
+                                        <span class="chart-kpi-val" id="chart-peak-day" style="color: #2563EB;">None</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bar Chart Arena with dynamic heights & empty state -->
+                            <div class="chart-stage-container" id="chart-stage-arena">
+                                <div class="chart-y-ruler">
+                                    <span>5h</span>
+                                    <span>4h</span>
+                                    <span>3h</span>
+                                    <span>2h</span>
+                                    <span>1h</span>
+                                    <span>0</span>
+                                </div>
+                                <div class="chart-dashed-lines">
+                                    <div class="chart-dash"></div>
+                                    <div class="chart-dash"></div>
+                                    <div class="chart-dash"></div>
+                                    <div class="chart-dash"></div>
+                                    <div class="chart-dash"></div>
+                                </div>
+                                
+                                <div class="chart-bars-viewport" id="chart-bars-viewport">
+                                    <!-- Dynamic bars Mon-Sun -->
+                                </div>
+
+                                <div class="chart-empty-overlay" id="chart-empty-overlay" style="display: none;">
+                                    <i data-lucide="clock" style="width: 22px; height: 22px; color: #94A3B8;"></i>
+                                    <div class="chart-empty-overlay-text">No study sessions recorded this week.</div>
+                                    <div class="chart-empty-overlay-sub">Study time is tracked from your completed quizzes and focus sessions.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPCOMING LEARNING (Only shown when scheduled quizzes/plans exist) -->
+                    <div id="upcoming-section" style="display: none; margin-bottom: 24px;">
+                        <div class="dashboard-card">
+                            <div class="dash-card-header">
+                                <div class="dash-header-title-group">
+                                    <div class="dash-header-icon orange" style="background: #FEF3C7; color: #D97706; border-color: #FDE68A;">
+                                        <i data-lucide="calendar-clock" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="dash-header-title">Upcoming Learning</h2>
+                                        <p class="dash-header-subtitle">Scheduled plans and unattempted practice quizzes</p>
+                                    </div>
+                                </div>
+                                <span class="badge-chip orange" id="upcoming-count-badge" style="background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A;">0 Upcoming</span>
+                            </div>
+                            <div class="activity-list-stack" id="upcoming-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 3: 2-COLUMN BALANCED ANALYTICS (Recent Activity + Weekly Goals & Streak) -->
+                    <div class="activity-goals-row-2col">
+                        <!-- Column 1: Recent Activity -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon">
+                                            <i data-lucide="activity" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Recent Activity</h2>
+                                            <p class="dash-header-subtitle">Your latest study sessions, quizzes, and planner milestones</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="activity-list-stack" id="activity-list">
+                                    <!-- Dynamic real activity items -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Weekly Goals & Streak -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon">
+                                            <i data-lucide="target" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Study Goals</h2>
+                                            <p class="dash-header-subtitle">Milestones toward syllabus completion</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="goals-progress-stack" id="goals-list">
+                                    <!-- Dynamic goals items -->
+                                </div>
+                            </div>
+
+                            <!-- Streak Banner -->
+                            <div class="streak-highlight-card">
+                                <div class="streak-hero-left">
+                                    <div class="streak-badge-emoji">🏆</div>
+                                    <div>
+                                        <div class="streak-title-txt" id="streak-label">0 Day Streak</div>
+                                        <div class="streak-desc-txt" id="streak-desc">Start studying today to begin your streak!</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 1.5rem;">🔥</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 4: BOTTOM LEARNING INSIGHTS SECTION -->
+                    <div class="insights-section-card" style="margin-top: 24px;">
+                        <div class="dash-card-header" style="margin-bottom: 0; padding-bottom: 0.75rem;">
+                            <div class="dash-header-title-group">
+                                <div class="dash-header-icon">
+                                    <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h2 class="dash-header-title">Learning Insights</h2>
+                                    <p class="dash-header-subtitle">AI-driven actionable intelligence based on your study history</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="insights-grid-3col" id="insights-grid">
+                            <!-- Dynamic learning insights -->
+                        </div>
+                    </div>
+
+                    <!-- Preserved container for API backwards-compatibility -->
+                    <div id="topic-performance" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reusable Sidebar injection and Page Logic -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">U</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        const formatRelativeTime = (dateStr) => {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+
+            if (diffMin < 1) return 'Just now';
+            if (diffMin < 60) return `${diffMin}m ago`;
+            if (diffHour < 24) return `${diffHour}h ago`;
+            if (diffDay === 1) return 'Yesterday';
+            if (diffDay < 7) return `${diffDay}d ago`;
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderSidebar();
+
+            // Mobile menu toggle
+            const menuBtn = document.getElementById('menu-toggle-btn');
+            const sidebarEl = document.getElementById('sidebar-container');
+            const overlayEl = document.getElementById('sidebar-overlay');
+            if (menuBtn && sidebarEl && overlayEl) {
+                menuBtn.addEventListener('click', () => {
+                    sidebarEl.classList.toggle('mobile-open');
+                    overlayEl.classList.toggle('mobile-open');
+                });
+                overlayEl.addEventListener('click', () => {
+                    sidebarEl.classList.remove('mobile-open');
+                    overlayEl.classList.remove('mobile-open');
+                });
+            }
+
+            const retryBtn = document.getElementById('retry-progress-btn');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => loadProgress());
+            }
+
+            const user = await checkAuth();
+            if (user) {
+                const nameEl = document.getElementById('sidebar-user-name');
+                const initialEl = document.getElementById('sidebar-user-initial');
+                const headerInitialEl = document.getElementById('header-user-avatar');
+                if (nameEl) nameEl.innerText = user.name || 'Student';
+                const initial = (user.name || 'U').charAt(0).toUpperCase();
+                if (initialEl) initialEl.innerText = initial;
+                if (headerInitialEl) headerInitialEl.innerText = initial;
+            }
+
+            loadProgress();
+        });
+
+        async function loadProgress() {
+            const errContainer = document.getElementById('progress-error-container');
+            const mainContent = document.getElementById('progress-main-content');
+
+            try {
+                if (errContainer) errContainer.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'block';
+
+                const response = await apiFetch('/progress');
+                if (!response || !response.success || !response.data) {
+                    throw new Error('Failed to retrieve progress analytics');
+                }
+
+                const data = response.data;
+                const overview = data.overview || {};
+                const weekly = data.weeklyStudyTime || { days: [], hasWeeklyData: false, totalHours: 0, dailyAverageHours: 0 };
+                const subjectMastery = data.subjectMastery || [];
+                const recentActivity = data.recentActivity || [];
+                const studyGoals = data.studyGoals || [];
+                const upcoming = data.upcoming || [];
+                const insights = data.insights || [];
+
+                // 1. KPI CARDS (Real calculated numbers only)
+                const completedQuestions = overview.questionsCompleted || 0;
+                const elFlash = document.getElementById('kpi-flashcards');
+                if (elFlash) elFlash.innerText = completedQuestions;
+
+                const elFlashTrend = document.getElementById('kpi-flashcards-trend');
+                if (elFlashTrend) {
+                    elFlashTrend.innerText = completedQuestions > 0 ? `${completedQuestions} completed` : '0 completed';
+                }
+
+                const elFlashSub = document.getElementById('kpi-flashcards-sub');
+                if (elFlashSub) {
+                    elFlashSub.innerText = completedQuestions > 0 
+                        ? `${completedQuestions} active recall answers` 
+                        : 'Completed quiz answers & card reviews';
+                }
+
+                // Accuracy: (total correctly answered / total attempted) * 100
+                const accuracyNum = overview.overallAccuracy || 0;
+                const elAcc = document.getElementById('kpi-accuracy');
+                if (elAcc) {
+                    elAcc.innerText = completedQuestions > 0 ? `${accuracyNum.toFixed(1)}%` : '--';
+                }
+
+                const elAccTrend = document.getElementById('kpi-accuracy-trend');
+                if (elAccTrend) {
+                    if (completedQuestions === 0) {
+                        elAccTrend.innerText = 'No attempts';
+                        elAccTrend.className = 'kpi-badge-trend trend-neutral';
+                    } else if (accuracyNum >= 75) {
+                        elAccTrend.innerHTML = '&uarr; High accuracy';
+                        elAccTrend.className = 'kpi-badge-trend trend-up';
+                    } else {
+                        elAccTrend.innerText = 'Steady pace';
+                        elAccTrend.className = 'kpi-badge-trend trend-neutral';
+                    }
+                }
+
+                const elAccSub = document.getElementById('kpi-accuracy-sub');
+                if (elAccSub) {
+                    elAccSub.innerText = completedQuestions > 0
+                        ? 'Calculated from completed quiz attempts'
+                        : 'Complete a quiz to calculate accuracy';
+                }
+
+                // Study Sessions
+                const sessionsCount = overview.studySessions || 0;
+                const elPlans = document.getElementById('kpi-plans');
+                if (elPlans) elPlans.innerText = sessionsCount;
+
+                const elPlansTrend = document.getElementById('kpi-plans-trend');
+                if (elPlansTrend) {
+                    elPlansTrend.innerText = sessionsCount > 0 ? `${sessionsCount} logged` : '0 logged';
+                }
+
+                const elPlansSub = document.getElementById('kpi-plans-sub');
+                if (elPlansSub) {
+                    elPlansSub.innerText = sessionsCount > 0
+                        ? 'Recorded focus study sessions'
+                        : 'Sessions tracked from quizzes and tasks';
+                }
+
+                // Total Study Time (Strictly from recorded sessions)
+                const totalHours = overview.totalStudyTime || 0;
+                const elTime = document.getElementById('kpi-time');
+                if (elTime) elTime.innerText = `${totalHours.toFixed(1)} hrs`;
+
+                const elTimeTrend = document.getElementById('kpi-time-trend');
+                if (elTimeTrend) {
+                    elTimeTrend.innerText = `${overview.totalStudyMinutes || 0} mins`;
+                }
+
+                const elTimeSub = document.getElementById('kpi-time-sub');
+                if (elTimeSub) {
+                    elTimeSub.innerText = totalHours > 0
+                        ? 'Cumulative focus duration'
+                        : 'Tracking starts when you begin a session';
+                }
+
+                // 2. SUBJECT MASTERY
+                const masteryBadge = document.getElementById('mastery-count-badge');
+                if (masteryBadge) {
+                    masteryBadge.innerText = `${subjectMastery.length} Subject${subjectMastery.length === 1 ? '' : 's'}`;
+                }
+
+                const subjectContainer = document.getElementById('subject-performance');
+                if (subjectContainer) {
+                    if (subjectMastery.length === 0) {
+                        subjectContainer.innerHTML = `
+                            <div class="dash-empty-state">
+                                <i data-lucide="book-open" style="width: 28px; height: 28px;"></i>
+                                <div class="dash-empty-state-title">No Subject Mastery Yet</div>
+                                <div class="dash-empty-state-desc">Take quizzes or practice questions to track your performance across subjects.</div>
+                                <a href="quizzes.html" class="dash-empty-btn"><i data-lucide="play" style="width: 14px; height: 14px;"></i> Take a Quiz</a>
+                            </div>
+                        `;
+                    } else {
+                        const colorSchemes = [
+                            { fill: 'fill-blue', pill: 'pill-blue', iconColor: '#2563EB', icon: 'cpu' },
+                            { fill: 'fill-green', pill: 'pill-green', iconColor: '#10B981', icon: 'binary' },
+                            { fill: 'fill-orange', pill: 'pill-orange', iconColor: '#F59E0B', icon: 'atom' },
+                            { fill: 'fill-coral', pill: 'pill-coral', iconColor: '#EF4444', icon: 'landmark' }
+                        ];
+
+                        subjectContainer.innerHTML = subjectMastery.map((sub, i) => {
+                            const scheme = colorSchemes[i % colorSchemes.length];
+                            if (sub.hasData) {
+                                return `
+                                    <div class="mastery-row-item">
+                                        <div class="mastery-row-meta">
+                                            <span class="mastery-subject-title">
+                                                <i data-lucide="${scheme.icon}" style="width: 16px; height: 16px; color: ${scheme.iconColor};"></i> ${sub.subject}
+                                            </span>
+                                            <span class="mastery-pct-pill ${scheme.pill}">${sub.accuracy}% Mastery</span>
+                                        </div>
+                                        <div class="mastery-bar-track">
+                                            <div class="mastery-bar-fill ${scheme.fill}" style="width: ${Math.max(4, sub.accuracy)}%;"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                return `
+                                    <div class="mastery-row-item">
+                                        <div class="mastery-row-meta">
+                                            <span class="mastery-subject-title">
+                                                <i data-lucide="${scheme.icon}" style="width: 16px; height: 16px; color: ${scheme.iconColor};"></i> ${sub.subject}
+                                            </span>
+                                            <span class="mastery-pct-pill pill-neutral">No performance data yet</span>
+                                        </div>
+                                        <div class="mastery-bar-track">
+                                            <div class="mastery-bar-fill" style="width: 0%;"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }).join('');
+                    }
+                }
+
+                // 3. WEEKLY STUDY TIME BAR CHART
+                const chartTotal = document.getElementById('chart-total-week');
+                if (chartTotal) chartTotal.innerText = `${(weekly.totalHours || 0).toFixed(1)} hrs`;
+
+                const chartAvg = document.getElementById('chart-daily-avg');
+                if (chartAvg) chartAvg.innerText = `${(weekly.dailyAverageHours || 0).toFixed(1)} hrs/day`;
+
+                const chartPeak = document.getElementById('chart-peak-day');
+                if (chartPeak) {
+                    chartPeak.innerText = weekly.peakDay ? `${weekly.peakDay.day} (${weekly.peakDay.hours}h)` : 'None';
+                }
+
+                const chartBarsViewport = document.getElementById('chart-bars-viewport');
+                const chartEmptyOverlay = document.getElementById('chart-empty-overlay');
+
+                if (chartBarsViewport) {
+                    const days = weekly.days && weekly.days.length === 7 ? weekly.days : [
+                        { day: 'Mon', percentage: 0, hours: 0 },
+                        { day: 'Tue', percentage: 0, hours: 0 },
+                        { day: 'Wed', percentage: 0, hours: 0 },
+                        { day: 'Thu', percentage: 0, hours: 0 },
+                        { day: 'Fri', percentage: 0, hours: 0 },
+                        { day: 'Sat', percentage: 0, hours: 0 },
+                        { day: 'Sun', percentage: 0, hours: 0 }
+                    ];
+
+                    chartBarsViewport.innerHTML = days.map(d => `
+                        <div class="chart-bar-column">
+                            <div class="chart-bar-pillar" style="height: ${weekly.hasWeeklyData && d.percentage > 0 ? d.percentage + '%' : '4px'}; opacity: ${d.percentage > 0 ? '1' : '0.35'};" title="${d.day}: ${d.hours} hrs"></div>
+                            <span class="chart-day-label">${d.day}</span>
+                        </div>
+                    `).join('');
+                }
+
+                if (chartEmptyOverlay) {
+                    chartEmptyOverlay.style.display = weekly.hasWeeklyData ? 'none' : 'flex';
+                }
+
+                // 4. UPCOMING LEARNING (Scheduled quizzes / unattempted quizzes)
+                const upcomingSection = document.getElementById('upcoming-section');
+                const upcomingList = document.getElementById('upcoming-list');
+                const upcomingBadge = document.getElementById('upcoming-count-badge');
+
+                if (upcoming && upcoming.length > 0) {
+                    if (upcomingSection) upcomingSection.style.display = 'block';
+                    if (upcomingBadge) upcomingBadge.innerText = `${upcoming.length} Upcoming`;
+                    if (upcomingList) {
+                        upcomingList.innerHTML = upcoming.map(item => `
+                            <div class="activity-card-item">
+                                <div class="activity-left-group">
+                                    <div class="activity-avatar-icon purple">
+                                        <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="activity-heading-text">${item.title}</div>
+                                        <div class="activity-desc-text">Subject: ${item.subject} &bull; ${item.questionsCount} Questions</div>
+                                    </div>
+                                </div>
+                                <div class="activity-right-tag">
+                                    <span class="activity-status-pill orange" style="background: #FEF3C7; color: #D97706;">Unattempted</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    if (upcomingSection) upcomingSection.style.display = 'none';
+                }
+
+                // 5. RECENT ACTIVITY (Real user actions only)
+                const activityList = document.getElementById('activity-list');
+                if (activityList) {
+                    if (recentActivity.length === 0) {
+                        activityList.innerHTML = `
+                            <div class="dash-empty-state">
+                                <i data-lucide="activity" style="width: 28px; height: 28px;"></i>
+                                <div class="dash-empty-state-title">No Recent Activity</div>
+                                <div class="dash-empty-state-desc">Upload documents, take quizzes, or generate flashcards to see your activity timeline.</div>
+                                <a href="documents.html" class="dash-empty-btn"><i data-lucide="upload" style="width: 14px; height: 14px;"></i> Upload Document</a>
+                            </div>
+                        `;
+                    } else {
+                        const typeConfigs = {
+                            quiz: { icon: 'check-circle', colorClass: 'green', pillBg: '#ECFDF5', pillColor: '#059669' },
+                            document: { icon: 'file-text', colorClass: 'blue', pillBg: '#EFF6FF', pillColor: '#2563EB' },
+                            plan: { icon: 'calendar', colorClass: 'purple', pillBg: '#F5F3FF', pillColor: '#8B5CF6' },
+                            flashcard: { icon: 'layers', colorClass: 'blue', pillBg: '#EFF6FF', pillColor: '#2563EB' },
+                            session: { icon: 'clock', colorClass: 'purple', pillBg: '#F5F3FF', pillColor: '#8B5CF6' }
+                        };
+
+                        activityList.innerHTML = recentActivity.map(item => {
+                            const cfg = typeConfigs[item.type] || typeConfigs.document;
+                            return `
+                                <div class="activity-card-item">
+                                    <div class="activity-left-group">
+                                        <div class="activity-avatar-icon ${cfg.colorClass}">
+                                            <i data-lucide="${cfg.icon}" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="activity-heading-text">${item.title}</div>
+                                            <div class="activity-desc-text">${item.description}</div>
+                                        </div>
+                                    </div>
+                                    <div class="activity-right-tag">
+                                        <span class="activity-time-text">${formatRelativeTime(item.timestamp)}</span>
+                                        <span class="activity-status-pill ${cfg.colorClass}" style="background: ${cfg.pillBg}; color: ${cfg.pillColor};">${item.status || 'Active'}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                // 6. STUDY GOALS (From user's actual Study Plans)
+                const goalsList = document.getElementById('goals-list');
+                if (goalsList) {
+                    if (studyGoals.length === 0) {
+                        goalsList.innerHTML = `
+                            <div class="dash-empty-state">
+                                <i data-lucide="target" style="width: 28px; height: 28px;"></i>
+                                <div class="dash-empty-state-title">No Study Goals Yet</div>
+                                <div class="dash-empty-state-desc">Create a structured study plan to set syllabus milestones and daily goals.</div>
+                                <a href="planner.html" class="dash-empty-btn"><i data-lucide="calendar" style="width: 14px; height: 14px;"></i> Create Study Plan</a>
+                            </div>
+                        `;
+                    } else {
+                        goalsList.innerHTML = studyGoals.map(g => {
+                            const isDone = g.percentage === 100;
+                            return `
+                                <div class="goal-task-row">
+                                    <div class="goal-check-pill ${isDone ? '' : 'pending'}">
+                                        <i data-lucide="${isDone ? 'check' : 'clock'}" style="width: 14px; height: 14px;"></i>
+                                    </div>
+                                    <div class="goal-content-body">
+                                        <div class="goal-content-header">
+                                            <span>${g.title}</span>
+                                            <span style="font-weight: 700; ${isDone ? 'color: #059669;' : ''}">
+                                                ${g.completed} / ${g.total} tasks &bull; ${g.percentage}%
+                                            </span>
+                                        </div>
+                                        <div class="goal-track-line">
+                                            <div class="goal-fill-line" style="width: ${Math.max(2, g.percentage)}%; ${isDone ? 'background: #10B981;' : ''}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                // Streak Banner
+                const streakLabel = document.getElementById('streak-label');
+                const streakDesc = document.getElementById('streak-desc');
+                const streakVal = overview.studyStreak || 0;
+                if (streakLabel) streakLabel.innerText = `${streakVal} Day Streak`;
+                if (streakDesc) {
+                    streakDesc.innerText = streakVal > 0
+                        ? 'Consistent study habit! Keep up your daily focus momentum.'
+                        : 'Start studying today to begin your consistency streak!';
+                }
+
+                // 7. LEARNING INSIGHTS (Real observations only)
+                const insightsGrid = document.getElementById('insights-grid');
+                if (insightsGrid) {
+                    if (insights.length === 0) {
+                        insightsGrid.innerHTML = `
+                            <div class="insight-card-item">
+                                <div class="insight-top-pill blue">
+                                    <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i> Getting Started
+                                </div>
+                                <div class="insight-highlight-title">Unlock Learning Insights</div>
+                                <div class="insight-body-text">Keep studying to unlock personalized learning insights. Complete quizzes and track study sessions to view your retention analytics.</div>
+                            </div>
+                            <div class="insight-card-item">
+                                <div class="insight-top-pill orange">
+                                    <i data-lucide="compass" style="width: 15px; height: 15px;"></i> Recommended Action
+                                </div>
+                                <div class="insight-highlight-title">Take a Diagnostic Quiz</div>
+                                <div class="insight-body-text">Generate a quick quiz on your uploaded documents to establish your accuracy and highlight topics for review.</div>
+                            </div>
+                            <div class="insight-card-item">
+                                <div class="insight-top-pill green">
+                                    <i data-lucide="trending-up" style="width: 15px; height: 15px;"></i> Study Habit
+                                </div>
+                                <div class="insight-highlight-title">Daily Study Routine</div>
+                                <div class="insight-body-text">Consistent daily study sessions produce significantly higher long-term recall than cramming.</div>
+                            </div>
+                        `;
+                    } else {
+                        const pillClasses = {
+                            strong: 'blue',
+                            focus: 'orange',
+                            velocity: 'green',
+                            info: 'blue'
+                        };
+                        const pillIcons = {
+                            strong: 'award',
+                            focus: 'compass',
+                            velocity: 'trending-up',
+                            info: 'info'
+                        };
+
+                        insightsGrid.innerHTML = insights.map(ins => {
+                            const color = pillClasses[ins.type] || 'blue';
+                            const icon = pillIcons[ins.type] || 'sparkles';
+                            return `
+                                <div class="insight-card-item">
+                                    <div class="insight-top-pill ${color}">
+                                        <i data-lucide="${icon}" style="width: 15px; height: 15px;"></i> ${ins.title}
+                                    </div>
+                                    <div class="insight-highlight-title">${ins.highlight}</div>
+                                    <div class="insight-body-text">${ins.body}</div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                lucide.createIcons();
+            } catch(e) {
+                console.error('Error loading progress analytics:', e);
+                if (errContainer) errContainer.style.display = 'flex';
+                if (mainContent) mainContent.style.display = 'none';
+                lucide.createIcons();
+            }
+        }
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Margdarshi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --primary-blue: #2563EB;
+            --primary-hover: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --primary-border: #BFDBFE;
+            --radius-card: 14px;
+            --radius-input: 10px;
+            --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: linear-gradient(180deg, #09132D 0%, #0D1C48 55%, #15358E 100%);
+            color: #94A3B8;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.15rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-brand i { color: #60A5FA; }
+        .sidebar-brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(96, 165, 250, 0.2);
+            color: #93C5FD;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.15s ease;
+        }
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-item.active {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .nav-item i { width: 19px; height: 19px; flex-shrink: 0; }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-user:hover { background: rgba(255, 255, 255, 0.1); }
+        .sidebar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .sidebar-user-info { flex: 1; overflow: hidden; }
+        .sidebar-user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-user-role { font-size: 0.78rem; color: #94A3B8; }
+
+        /* ── Mobile Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        /* ── Main Area ── */
+        .main-wrapper {
+            flex: 1;
+            width: calc(100% - 240px);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-page);
+            position: relative;
+        }
+        .main-wrapper::-webkit-scrollbar { width: 6px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* ── Top Header ── */
+        .top-header {
+            padding: 1.25rem 28px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-title-block h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .header-title-block p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .btn-header-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border-radius: var(--radius-input);
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-header-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+        .menu-toggle-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        .header-icon-btn:hover {
+            background: var(--border-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .notif-dot {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            width: 7px;
+            height: 7px;
+            background: #EF4444;
+            border-radius: 50%;
+            border: 1.5px solid var(--bg-card);
+        }
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ── Full Width Page Content ── */
+        .page-content {
+            padding: 20px 28px 32px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── SECTION 1: 4 LARGE HIGH-IMPACT KPI CARDS ── */
+        .kpi-row-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        .kpi-card-hero {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.15rem 1.35rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 132px;
+            gap: 0.65rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .kpi-card-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+            border-color: var(--border-hover);
+        }
+        .kpi-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .kpi-icon-pill {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+        }
+        .kpi-icon-pill.blue { background: linear-gradient(135deg, #3B82F6, #1D4ED8); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .kpi-icon-pill.purple { background: linear-gradient(135deg, #8B5CF6, #6D28D9); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2); }
+        .kpi-icon-pill.green { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .kpi-icon-pill.orange { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+
+        .kpi-badge-trend {
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .trend-blue { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .trend-purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .trend-green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .trend-orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        .kpi-num-large {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+            letter-spacing: -0.025em;
+        }
+        .kpi-label-text {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .kpi-sub-context {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── SECTION 2: QUICK ACTIONS ── */
+        .section-header-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: -6px;
+        }
+        .section-header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .section-header-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+        .action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.15rem 1.25rem;
+            box-shadow: var(--shadow-subtle);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-card);
+        }
+        .action-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .action-icon-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        .action-card:hover .action-icon-pill {
+            transform: scale(1.06);
+        }
+        .action-icon-pill.blue { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .action-icon-pill.purple { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .action-icon-pill.green { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .action-icon-pill.orange { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        .action-arrow-icon {
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .action-card:hover .action-arrow-icon {
+            color: var(--primary-blue);
+            transform: translateX(3px);
+        }
+        .action-card-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.25;
+            margin-bottom: 4px;
+        }
+        .action-card-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* ── SECTION 3 & 4: 2-COLUMN BALANCED MAIN GRID (2fr 1fr) ── */
+        .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+            gap: 24px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.5rem 1.75rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: var(--shadow-card);
+        }
+
+        .dash-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .dash-header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+        .dash-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .dash-header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .dash-header-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        .dash-view-all-link {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            transition: gap 0.2s ease;
+        }
+        .dash-view-all-link:hover {
+            gap: 6px;
+            text-decoration: underline;
+        }
+
+        /* Recent Docs List Item */
+        .doc-list-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        .doc-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            gap: 1rem;
+        }
+        .doc-list-item:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-subtle);
+            transform: translateY(-1px);
+        }
+        .doc-left-info {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+            flex: 1;
+        }
+        .doc-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+        }
+        .doc-title-text {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .doc-meta-sub {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .doc-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .status-pill-ready {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .doc-action-link {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            background: var(--primary-light);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .doc-action-link:hover {
+            background: rgba(37, 99, 235, 0.25);
+        }
+
+        /* Today's Plan Area */
+        .plan-summary-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.15rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .plan-row-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .plan-metric-lbl { color: var(--text-secondary); font-weight: 500; }
+        .plan-metric-val { color: var(--text-primary); font-weight: 700; }
+
+        .plan-track-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .plan-fill-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
+            border-radius: 6px;
+            transition: width 0.6s ease;
+        }
+
+        /* Weak Topics List */
+        .weak-topics-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .weak-topic-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.85rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            transition: all 0.15s ease;
+        }
+        .weak-topic-row:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+        }
+        .weak-topic-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            overflow: hidden;
+        }
+        .weak-badge-idx {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.15);
+            color: #F87171;
+            font-size: 0.72rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .weak-name-txt {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .weak-action-btn {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #F87171;
+            background: rgba(239, 68, 68, 0.15);
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        /* ── Standard Compact Empty States ── */
+        .empty-state-compact {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.5rem;
+            min-height: 175px;
+        }
+        .empty-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+        .empty-title-text {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .empty-sub-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            max-width: 280px;
+            line-height: 1.4;
+        }
+        .btn-empty-action {
+            margin-top: 4px;
+            padding: 0.45rem 0.95rem;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .btn-empty-action:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .kpi-row-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-main-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .main-wrapper {
+                width: 100%;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+            .menu-toggle-btn {
+                display: flex;
+            }
+            .kpi-row-4 { grid-template-columns: 1fr; }
+            .quick-actions-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 1rem 1rem; }
+            .page-content { padding: 1rem; }
+            .dashboard-card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; width: 100%; height: 100%;">
+        <!-- Sidebar Backdrop for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1 id="greeting">Good Evening, Keshav 👋</h1>
+                        <p>Stay consistent and keep making progress toward your academic goals.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <a href="planner.html" class="btn-header-cta">
+                        <i data-lucide="calendar-plus" style="width: 16px; height: 16px;"></i>
+                        <span>Create Study Plan</span>
+                    </a>
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <button id="logout-btn" class="header-icon-btn" title="Logout">
+                        <i data-lucide="log-out" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <div class="header-avatar" id="header-user-avatar" style="cursor: pointer;" onclick="window.location.href='profile.html'">K</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- SECTION 1: 4 LARGE HIGH-IMPACT KPI CARDS -->
+                <div class="kpi-row-4" id="stats-container">
+                    <!-- KPI 1: Documents -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill blue">
+                                <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-blue">Active Library</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="kpi-docs-count">0</div>
+                            <div class="kpi-label-text">Total Documents</div>
+                            <div class="kpi-sub-context">Notes, textbooks &amp; slides</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Quizzes Completed -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill purple">
+                                <i data-lucide="check-square" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-purple">Assessments</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="kpi-quizzes-count">0</div>
+                            <div class="kpi-label-text">Quizzes Completed</div>
+                            <div class="kpi-sub-context">Questions &amp; evaluations attempted</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Accuracy -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill green">
+                                <i data-lucide="trending-up" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-green">Recall Score</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="kpi-accuracy-count">0%</div>
+                            <div class="kpi-label-text">Average Accuracy</div>
+                            <div class="kpi-sub-context">Overall mastery across subjects</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Study Streak -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill orange">
+                                <i data-lucide="flame" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-orange">Consistency</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="kpi-streak-count">0</div>
+                            <div class="kpi-label-text">Study Streak</div>
+                            <div class="kpi-sub-context">Consecutive active study days</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: QUICK ACTIONS -->
+                <div>
+                    <div class="section-header-block" style="margin-bottom: 1rem;">
+                        <div>
+                            <h2 class="section-header-title">Quick Actions</h2>
+                            <p class="section-header-subtitle">Jump straight into your personalized AI study workflows</p>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions-grid">
+                        <a href="chat.html" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-icon-pill blue">
+                                    <i data-lucide="message-square" style="width: 22px; height: 22px;"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="action-arrow-icon" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Chat with AI</div>
+                                <div class="action-card-desc">Ask doubts instantly &amp; get answers from your notes</div>
+                            </div>
+                        </a>
+
+                        <a href="documents.html" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-icon-pill purple">
+                                    <i data-lucide="upload-cloud" style="width: 22px; height: 22px;"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="action-arrow-icon" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Upload Document</div>
+                                <div class="action-card-desc">Import PDFs, notes and slides for AI processing</div>
+                            </div>
+                        </a>
+
+                        <a href="quizzes.html" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-icon-pill green">
+                                    <i data-lucide="check-circle" style="width: 22px; height: 22px;"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="action-arrow-icon" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Generate Quiz</div>
+                                <div class="action-card-desc">Create adaptive practice tests from your study files</div>
+                            </div>
+                        </a>
+
+                        <a href="flashcards.html" class="action-card">
+                            <div class="action-card-top">
+                                <div class="action-icon-pill orange">
+                                    <i data-lucide="layers" style="width: 22px; height: 22px;"></i>
+                                </div>
+                                <i data-lucide="arrow-up-right" class="action-arrow-icon" style="width: 18px; height: 18px;"></i>
+                            </div>
+                            <div>
+                                <div class="action-card-title">Create Flashcards</div>
+                                <div class="action-card-desc">Generate active recall decks with spaced repetition</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- SECTION 3, 4, 5: MAIN GRID (2fr 1fr) -->
+                <div class="dashboard-main-grid">
+                    <!-- Left: Recent Documents -->
+                    <div class="dashboard-card">
+                        <div>
+                            <div class="dash-card-header">
+                                <div class="dash-header-title-group">
+                                    <div class="dash-header-icon">
+                                        <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="dash-header-title">Recent Documents</h2>
+                                        <p class="dash-header-subtitle">Your uploaded course materials and lecture notes</p>
+                                    </div>
+                                </div>
+                                <a href="documents.html" class="dash-view-all-link">View all &rarr;</a>
+                            </div>
+
+                            <div id="recent-docs" class="doc-list-stack">
+                                <!-- Populated dynamically by JS -->
+                                <div class="empty-state-compact">
+                                    <div class="empty-icon-circle"><i data-lucide="loader" style="width: 22px; height: 22px; animation: spin 1s linear infinite;"></i></div>
+                                    <div class="empty-title-text">Loading documents...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Today's Plan & Weak Topics -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Today's Plan Card -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon" style="background: #F5F3FF; color: #7C3AED; border-color: #EDE9FE;">
+                                            <i data-lucide="calendar" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Today's Plan</h2>
+                                            <p class="dash-header-subtitle">Daily milestones and progress</p>
+                                        </div>
+                                    </div>
+                                    <a href="planner.html" class="dash-view-all-link">View all &rarr;</a>
+                                </div>
+
+                                <div id="today-plan-container">
+                                    <!-- Populated dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Weak Topics to Review Card -->
+                        <div class="dashboard-card">
+                            <div>
+                                <div class="dash-card-header">
+                                    <div class="dash-header-title-group">
+                                        <div class="dash-header-icon red" style="background: #FEF2F2; color: #EF4444; border-color: #FEE2E2;">
+                                            <i data-lucide="target" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="dash-header-title">Weak Topics to Review</h2>
+                                            <p class="dash-header-subtitle">Subjects flagged for active recall reinforcement</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="weak-topics-container">
+                                    <ul id="weak-topics-list" class="weak-topics-stack">
+                                        <!-- Populated dynamically by JS -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reusable Sidebar injection and Page Logic -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">K</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderSidebar();
+
+            // Mobile toggle
+            const menuBtn = document.getElementById('menu-toggle-btn');
+            const sidebarEl = document.getElementById('sidebar-container');
+            const overlayEl = document.getElementById('sidebar-overlay');
+            if (menuBtn && sidebarEl && overlayEl) {
+                menuBtn.addEventListener('click', () => {
+                    sidebarEl.classList.toggle('mobile-open');
+                    overlayEl.classList.toggle('mobile-open');
+                });
+                overlayEl.addEventListener('click', () => {
+                    sidebarEl.classList.remove('mobile-open');
+                    overlayEl.classList.remove('mobile-open');
+                });
+            }
+
+            const user = await checkAuth();
+            if (user) {
+                const firstName = user.name ? user.name.split(' ')[0] : 'Student';
+                document.getElementById('greeting').innerText = `Good Evening, ${firstName} 👋`;
+                
+                const nameEl = document.getElementById('sidebar-user-name');
+                const initialEl = document.getElementById('sidebar-user-initial');
+                const headerInitialEl = document.getElementById('header-user-avatar');
+                if (nameEl) nameEl.innerText = user.name;
+                if (initialEl) initialEl.innerText = user.name.charAt(0).toUpperCase();
+                if (headerInitialEl) headerInitialEl.innerText = user.name.charAt(0).toUpperCase();
+            }
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+
+            // Fetch live data
+            loadDashboardData();
+        });
+
+        async function loadDashboardData() {
+            try {
+                const [progressRes, docsRes, planRes] = await Promise.allSettled([
+                    apiFetch('/progress'),
+                    apiFetch('/documents'),
+                    apiFetch('/planner')
+                ]);
+
+                const p = (progressRes.status === 'fulfilled' && progressRes.value && progressRes.value.data) ? progressRes.value.data : null;
+                const docs = (docsRes.status === 'fulfilled' && docsRes.value && docsRes.value.data) ? docsRes.value.data : [];
+                const plans = (planRes.status === 'fulfilled' && planRes.value && planRes.value.data) ? planRes.value.data : [];
+
+                // 1. KPI Updates
+                const overview = p?.overview || {};
+                const docCount = docs.length;
+                const quizCount = overview.quizzesCompleted ?? p?.quizzesCompleted ?? overview.questionsCompleted ?? p?.questionsAttempted ?? 0;
+                const rawAcc = overview.overallAccuracy ?? p?.averageAccuracy;
+                const accuracy = typeof rawAcc === 'number' ? rawAcc.toFixed(1) + '%' : '0%';
+                const streak = overview.studyStreak ?? p?.studyStreak ?? 0;
+
+                const elDocs = document.getElementById('kpi-docs-count');
+                const elQuiz = document.getElementById('kpi-quizzes-count');
+                const elAcc = document.getElementById('kpi-accuracy-count');
+                const elStreak = document.getElementById('kpi-streak-count');
+
+                if (elDocs) elDocs.innerText = docCount;
+                if (elQuiz) elQuiz.innerText = quizCount;
+                if (elAcc) elAcc.innerText = accuracy;
+                if (elStreak) elStreak.innerText = streak;
+
+                // 2. Recent Documents
+                const recentDocsEl = document.getElementById('recent-docs');
+                if (recentDocsEl) {
+                    if (docs && docs.length > 0) {
+                        recentDocsEl.innerHTML = docs.slice(0, 4).map(d => {
+                            const dateStr = new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            return `
+                                <div class="doc-list-item">
+                                    <div class="doc-left-info">
+                                        <div class="doc-icon-badge">
+                                            <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+                                        </div>
+                                        <div style="min-width: 0; flex: 1;">
+                                            <div class="doc-title-text" title="${d.originalName}">${d.originalName}</div>
+                                            <div class="doc-meta-sub">
+                                                <span>${d.subject || 'General'}</span>
+                                                <span>&bull;</span>
+                                                <span>Uploaded ${dateStr}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="doc-right-actions">
+                                        <span class="status-pill-ready">${(d.status || 'READY').toUpperCase()}</span>
+                                        <a href="${window.location.origin.includes('5173') ? 'http://localhost:5000' : ''}/uploads/${d.filename}" target="_blank" class="doc-action-link">View</a>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        recentDocsEl.innerHTML = `
+                            <div class="empty-state-compact">
+                                <div class="empty-icon-circle"><i data-lucide="file-text" style="width: 22px; height: 22px;"></i></div>
+                                <div class="empty-title-text">No documents yet</div>
+                                <div class="empty-sub-text">Upload your lecture notes, PDFs or textbooks to get started with AI study help.</div>
+                                <a href="documents.html" class="btn-empty-action">Upload Document</a>
+                            </div>
+                        `;
+                    }
+                }
+
+                // 3. Today's Plan
+                const planContainer = document.getElementById('today-plan-container');
+                if (planContainer) {
+                    if (plans && plans.length > 0) {
+                        const activePlan = plans[0];
+                        const daysList = (activePlan.plan && Array.isArray(activePlan.plan)) ? activePlan.plan : (activePlan.days || []);
+                        const totalDays = daysList.length > 0 ? daysList.length : 1;
+                        
+                        let totalTasks = 0;
+                        let completedTasks = 0;
+                        daysList.forEach(d => {
+                            const tasks = d.tasks || [];
+                            totalTasks += tasks.length;
+                            completedTasks += tasks.filter(t => t.isCompleted).length;
+                        });
+
+                        const pct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+                        planContainer.innerHTML = `
+                            <div class="plan-summary-box">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong style="font-size: 0.95rem; color: var(--text-primary);">${activePlan.examName || 'Active Study Plan'}</strong>
+                                    <span class="plan-status-badge" style="font-size: 0.76rem; font-weight: 700; color: #2563EB; background: #EFF6FF; padding: 2px 8px; border-radius: 12px;">In Progress</span>
+                                </div>
+                                <div class="plan-row-metric">
+                                    <span class="plan-metric-lbl">Target Timeline:</span>
+                                    <span class="plan-metric-val">${totalDays} Days</span>
+                                </div>
+                                <div class="plan-row-metric">
+                                    <span class="plan-metric-lbl">Completed:</span>
+                                    <span class="plan-metric-val">${completedTasks} / ${totalTasks} tasks (${pct}%)</span>
+                                </div>
+                                <div class="plan-track-bar">
+                                    <div class="plan-fill-bar" style="width: ${pct}%;"></div>
+                                </div>
+                                <a href="planner.html" style="font-size: 0.8rem; font-weight: 600; color: #2563EB; text-decoration: none; text-align: right; margin-top: 2px;">Continue Schedule &rarr;</a>
+                            </div>
+                        `;
+                    } else {
+                        planContainer.innerHTML = `
+                            <div class="empty-state-compact">
+                                <div class="empty-icon-circle purple" style="background: #F5F3FF; color: #7C3AED;"><i data-lucide="calendar" style="width: 22px; height: 22px;"></i></div>
+                                <div class="empty-title-text">No study plan for today</div>
+                                <div class="empty-sub-text">Create your personalized study schedule to pace your exam preparation.</div>
+                                <a href="planner.html" class="btn-empty-action" style="background: #7C3AED;">Create Study Plan</a>
+                            </div>
+                        `;
+                    }
+                }
+
+                // 4. Weak Topics to Review
+                const weakContainer = document.getElementById('weak-topics-container');
+                const weakList = document.getElementById('weak-topics-list');
+                if (weakList && weakContainer) {
+                    if (p && p.weakTopics && p.weakTopics.length > 0) {
+                        weakList.innerHTML = p.weakTopics.slice(0, 4).map((wt, i) => `
+                            <li class="weak-topic-row">
+                                <div class="weak-topic-left">
+                                    <span class="weak-badge-idx">${i + 1}</span>
+                                    <span class="weak-name-txt" title="${wt}">${wt}</span>
+                                </div>
+                                <a href="quizzes.html" class="weak-action-btn">Practice</a>
+                            </li>
+                        `).join('');
+                    } else {
+                        weakContainer.innerHTML = `
+                            <div class="empty-state-compact" style="min-height: 140px;">
+                                <div class="empty-icon-circle green" style="background: #ECFDF5; color: #10B981;"><i data-lucide="check-circle" style="width: 22px; height: 22px;"></i></div>
+                                <div class="empty-title-text">All strong!</div>
+                                <div class="empty-sub-text">No weak topics identified yet. Complete quizzes to track areas needing revision.</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                lucide.createIcons();
+            } catch (err) {
+                console.error('Error loading dashboard data:', err);
+            }
+        }
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>

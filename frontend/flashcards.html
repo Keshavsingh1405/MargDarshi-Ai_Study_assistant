@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Flashcards - Margdarshi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --primary-blue: #2563EB;
+            --primary-hover: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --primary-border: #BFDBFE;
+            --radius-card: 14px;
+            --radius-input: 10px;
+            --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: linear-gradient(180deg, #09132D 0%, #0D1C48 55%, #15358E 100%);
+            color: #94A3B8;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.15rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-brand i { color: #60A5FA; }
+        .sidebar-brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(96, 165, 250, 0.2);
+            color: #93C5FD;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.15s ease;
+        }
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-item.active {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .nav-item i { width: 19px; height: 19px; flex-shrink: 0; }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-user:hover { background: rgba(255, 255, 255, 0.1); }
+        .sidebar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .sidebar-user-info { flex: 1; overflow: hidden; }
+        .sidebar-user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-user-role { font-size: 0.78rem; color: #94A3B8; }
+
+        /* ── Mobile Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        /* ── Main Area ── */
+        .main-wrapper {
+            flex: 1;
+            width: calc(100% - 240px);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-page);
+            position: relative;
+        }
+        .main-wrapper::-webkit-scrollbar { width: 6px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* ── Top Header ── */
+        .top-header {
+            padding: 1.25rem 28px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-title-block h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .header-title-block p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-badge-ai {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.95rem;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .header-badge-ai span.pulse {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #2563EB;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+        }
+        .menu-toggle-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+        .header-icon-btn:hover {
+            background: #F1F5F9;
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .notif-dot {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            width: 7px;
+            height: 7px;
+            background: #EF4444;
+            border-radius: 50%;
+            border: 1.5px solid white;
+        }
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ── Full Width Page Content Container ── */
+        .page-content {
+            padding: 24px 28px 36px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── SECTION 1: TOP WORKSPACE GRID (67% / 33%) ── */
+        .top-generator-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+            gap: 24px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* Real SaaS Cards */
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.6rem 1.85rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .app-card:hover {
+            box-shadow: var(--shadow-card);
+        }
+
+        /* Generator Hero Header */
+        .gen-hero-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.15rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .gen-badge-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+        }
+        .gen-hero-text h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 0.25rem;
+        }
+        .badge-chip {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid #DBEAFE;
+        }
+        .gen-hero-text p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* Two-Column Form Layout with 48-50px Fields */
+        .form-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px 18px;
+            margin-bottom: 1.15rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.45rem;
+        }
+        .form-label-hint {
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        .input-group-styled {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon-el {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-control-styled {
+            width: 100%;
+            height: 48px;
+            padding: 0 1rem 0 2.9rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-input);
+            background: var(--bg-card);
+            font-size: 0.94rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .input-control-styled::placeholder {
+            color: #94A3B8;
+        }
+        .input-control-styled:hover {
+            border-color: var(--border-hover);
+        }
+        .input-control-styled:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        select.input-control-styled {
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.75rem;
+        }
+
+        /* 50px CTA Button */
+        .btn-generate-cta {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-input);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-generate-cta:hover {
+            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+        .btn-generate-cta:active {
+            transform: translateY(0);
+        }
+        .btn-generate-cta:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 3 Rich Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .feature-mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            transition: all 0.2s ease;
+        }
+        .feature-mini-card:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-subtle);
+        }
+        .feature-icon-pill {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature-icon-pill.green { background: #ECFDF5; color: #10B981; }
+        .feature-icon-pill.purple { background: #F5F3FF; color: #8B5CF6; }
+        .feature-icon-pill.blue { background: #EFF6FF; color: #2563EB; }
+        .feature-mini-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+        .feature-mini-desc {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Right Column: Flashcard Insights */
+        .insights-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.35rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .insights-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .insights-card-title {
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .insights-card-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .benefit-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+        .benefit-row-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.15s ease;
+        }
+        .benefit-row-item:hover {
+            background: var(--border-hover);
+            border-color: var(--border-hover);
+            transform: translateX(2px);
+        }
+        .benefit-icon-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .benefit-heading-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+        .benefit-paragraph {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        .spaced-rep-callout {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-top: auto;
+        }
+        .spaced-rep-text {
+            font-size: 0.8rem;
+            color: #166534;
+            line-height: 1.45;
+        }
+        .spaced-rep-text strong {
+            color: #14532D;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* ── SECTION 2: MY DECKS (Balanced & Compact) ── */
+        .my-decks-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.35rem 1.65rem;
+            box-shadow: var(--shadow-subtle);
+        }
+        .decks-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .decks-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .decks-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .decks-header-title {
+            font-size: 1.12rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .decks-header-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+        .decks-pill-badge {
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid #DBEAFE;
+        }
+
+        /* Compact, Centered Empty State (180-240px Height) */
+        .decks-empty-container {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 460px;
+            min-height: 190px;
+            margin: 0 auto;
+        }
+        .decks-empty-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-subtle);
+        }
+        .decks-empty-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .decks-empty-desc {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+            max-width: 330px;
+        }
+        .btn-empty-generate {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.35rem;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: var(--radius-input);
+            font-weight: 600;
+            font-size: 0.88rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-empty-generate:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Decks Ready State (When Cards Exist) */
+        .deck-ready-hub {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .deck-status-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.15rem 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+        .deck-status-stats {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .deck-stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .deck-stat-lbl {
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .deck-stat-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .deck-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .btn-study-action {
+            height: 44px;
+            padding: 0 1.35rem;
+            border-radius: var(--radius-input);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        .btn-study-now {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+        .btn-study-now:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-discard {
+            background: var(--danger-light);
+            color: var(--danger-text);
+            border: 1px solid var(--danger-border);
+        }
+        .btn-discard:hover {
+            opacity: 0.9;
+        }
+
+        /* Cards Preview Responsive Grid */
+        .deck-cards-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .card-tile-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.15rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-subtle);
+        }
+        .card-tile-preview:hover {
+            border-color: var(--primary-border);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+        }
+        .card-tile-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-tile-num {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .card-tile-front {
+            font-size: 0.94rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+        .card-tile-back {
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            padding-top: 0.5rem;
+            border-top: 1px dashed #F1F5F9;
+        }
+
+        /* ── Full Arena Study View (When Reviewing) ── */
+        .study-view-container {
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
+            width: 100%;
+        }
+        .back-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.35rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-input);
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 1.75rem;
+            transition: all 0.15s;
+            box-shadow: var(--shadow-subtle);
+        }
+        .back-nav-btn:hover {
+            background: #F1F5F9;
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+        .study-progress-pill {
+            display: inline-block;
+            background: #EFF6FF;
+            color: var(--primary-blue);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 1.75rem;
+            border: 1px solid #DBEAFE;
+        }
+        .scene {
+            width: 100%;
+            height: 400px;
+            perspective: 1000px;
+            margin: 0 auto 1.5rem;
+            cursor: pointer;
+        }
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            position: relative;
+            border-radius: 18px;
+            box-shadow: var(--shadow-card);
+        }
+        .scene.is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2.5rem;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            overflow-y: auto;
+        }
+        .card-face-front {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-page) 100%);
+            line-height: 1.4;
+        }
+        .card-face-back {
+            transform: rotateY(180deg);
+            font-size: 1.35rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: var(--bg-card);
+            line-height: 1.6;
+        }
+        .card-face-tag {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.75rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            background: #F1F5F9;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .flip-hint-text {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .rate-controls-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.25rem;
+        }
+        .btn-rate {
+            padding: 0.9rem 2rem;
+            border-radius: var(--radius-input);
+            font-size: 0.96rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-rate-learning {
+            background: var(--danger-light);
+            color: var(--danger-text);
+            border: 1px solid var(--danger-border);
+        }
+        .btn-rate-learning:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .btn-rate-known {
+            background: var(--success-light);
+            color: var(--success-text);
+            border: 1px solid var(--success-border);
+        }
+        .btn-rate-known:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* ── Decks Grid & Cards Layout ── */
+        .decks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .deck-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.25rem 1.35rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 0.9rem;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.2s ease;
+        }
+        .deck-card:hover {
+            box-shadow: var(--shadow-card);
+            border-color: var(--primary-border);
+            transform: translateY(-2px);
+        }
+        .deck-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .deck-date-text {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .deck-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.35;
+            margin-top: 0.2rem;
+            word-break: break-word;
+        }
+        .deck-topic-row {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.25rem;
+        }
+        .deck-card-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+        }
+        .deck-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+        }
+        .deck-meta-pill.known-pill {
+            background: var(--success-light);
+            color: var(--success-text);
+            border-color: var(--success-border);
+        }
+        .deck-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            margin-top: 0.35rem;
+        }
+        .btn-study-deck {
+            flex: 1;
+            height: 40px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-input);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        }
+        .btn-study-deck:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-preview-deck {
+            height: 40px;
+            padding: 0 0.85rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: var(--radius-input);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            transition: all 0.15s;
+        }
+        .btn-preview-deck:hover {
+            background: var(--border-hover);
+        }
+        .btn-deck-delete {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        .btn-deck-delete:hover {
+            color: #EF4444;
+            background: var(--danger-light);
+            border-color: var(--danger-border);
+        }
+        .deck-preview-panel {
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .preview-item-row {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.84rem;
+        }
+        .preview-q-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .preview-a-toggle {
+            font-size: 0.78rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .preview-a-text {
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            display: none;
+        }
+
+        /* ── Visual Distinction: Question vs Answer ── */
+        .card-face-front {
+            border-top: 5px solid var(--primary-blue);
+        }
+        .card-face-back {
+            border-top: 5px solid #10B981;
+        }
+        .card-face-tag.tag-question {
+            color: #2563EB;
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-face-tag.tag-answer {
+            color: #10B981;
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── Study View Navigation Controls Bar ── */
+        .study-controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .btn-study-nav {
+            height: 46px;
+            padding: 0 1.35rem;
+            border-radius: var(--radius-input);
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            transition: all 0.15s;
+        }
+        .btn-study-nav:hover:not(:disabled) {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: #F8FAFC;
+        }
+        .btn-study-nav:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-flip-action {
+            height: 48px;
+            padding: 0 2rem;
+            border-radius: var(--radius-input);
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border: none;
+            font-size: 0.96rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s;
+        }
+        .btn-flip-action:hover {
+            background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(37, 99, 235, 0.35);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .top-generator-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 1.25rem 20px; }
+            .page-content { padding: 20px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .main-wrapper {
+                width: 100%;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+            .menu-toggle-btn {
+                display: flex;
+            }
+            .form-grid-2x2 { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 1rem 1rem; }
+            .page-content { padding: 1rem; }
+            .app-card { padding: 1.25rem; }
+            .scene { height: 320px; }
+            .card-face { padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; width: 100%; height: 100%;">
+        <!-- Sidebar Backdrop for Mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1>Smart Flashcards</h1>
+                        <p>Generate personalized revision cards from your study material</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-badge-ai">
+                        <span class="pulse"></span>
+                        AI Spaced Repetition Engine
+                    </div>
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <div class="header-avatar" id="header-user-avatar" style="cursor: pointer;" onclick="window.location.href='profile.html'">K</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- Main Workspace View -->
+                <div id="main-view" style="display: flex; flex-direction: column; gap: 24px; width: 100%;">
+                    
+                    <!-- SECTION 1: TOP GRID (Generation 67% + Flashcard Insights 33%) -->
+                    <div class="top-generator-grid">
+                        <!-- Left: Primary Form Card (67%) -->
+                        <div class="app-card">
+                            <div>
+                                <div class="gen-hero-header">
+                                    <div class="gen-badge-icon">
+                                        <i data-lucide="sparkles" style="width: 26px; height: 26px;"></i>
+                                    </div>
+                                    <div class="gen-hero-text">
+                                        <h2>
+                                            Generate Flashcards
+                                            <span class="badge-chip">AI Powered</span>
+                                        </h2>
+                                        <p>Select your subject and topic. Our AI extracts core definitions, formulas, and concepts into interactive flashcards.</p>
+                                    </div>
+                                </div>
+
+                                <form id="generate-form">
+                                    <!-- Optional Custom Deck Title -->
+                                    <div class="form-group" style="margin-bottom: 14px;">
+                                        <label class="form-label" for="deck-title">
+                                            <span>Deck Title</span>
+                                            <span class="form-label-hint">Optional &mdash; auto-generated if blank</span>
+                                        </label>
+                                        <div class="input-group-styled">
+                                            <i data-lucide="bookmark" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                            <input type="text" id="deck-title" class="input-control-styled" placeholder="e.g. Software Engineering Exam Prep">
+                                        </div>
+                                    </div>
+
+                                    <!-- 2x2 Form Layout with 48px Fields -->
+                                    <div class="form-grid-2x2">
+                                        <!-- Subject -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="subject">
+                                                <span>Subject <span style="color: #EF4444;">*</span></span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="book-open" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="text" id="subject" class="input-control-styled" list="subject-list" placeholder="e.g. History, Computer Science, Biology" value="History" required>
+                                                <datalist id="subject-list">
+                                                    <option value="History">
+                                                    <option value="Computer Science">
+                                                    <option value="Mathematics">
+                                                    <option value="Physics">
+                                                    <option value="Chemistry">
+                                                    <option value="Biology">
+                                                    <option value="General">
+                                                </datalist>
+                                            </div>
+                                        </div>
+
+                                        <!-- Topic -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="topic">
+                                                <span>Topic</span>
+                                                <span class="form-label-hint">Optional</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="edit-3" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="text" id="topic" class="input-control-styled" placeholder="e.g. World War 2, Binary Trees">
+                                            </div>
+                                        </div>
+
+                                        <!-- Number of Cards -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="count">
+                                                <span>Number of Cards</span>
+                                                <span class="form-label-hint">1 to 20</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="layers" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <input type="number" id="count" class="input-control-styled" value="5" min="1" max="20" required>
+                                            </div>
+                                        </div>
+
+                                        <!-- Difficulty Level -->
+                                        <div class="form-group">
+                                            <label class="form-label" for="difficulty">
+                                                <span>Difficulty Level</span>
+                                                <span class="form-label-hint">Recall depth</span>
+                                            </label>
+                                            <div class="input-group-styled">
+                                                <i data-lucide="gauge" style="width: 18px; height: 18px;" class="input-icon-el"></i>
+                                                <select id="difficulty" class="input-control-styled">
+                                                    <option value="Easy">Easy &mdash; Basic definitions & facts</option>
+                                                    <option value="Medium" selected>Medium &mdash; Standard exam recall</option>
+                                                    <option value="Hard">Hard &mdash; Deep conceptual analysis</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn-generate-cta" id="generate-btn">
+                                        <i data-lucide="sparkles" style="width: 18px; height: 18px;"></i> Generate Flashcards &rarr;
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- 3 Rich Feature Cards -->
+                            <div class="features-grid">
+                                <div class="feature-mini-card">
+                                    <div class="feature-icon-pill green">
+                                        <i data-lucide="zap" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="feature-mini-title">AI Powered</div>
+                                        <div class="feature-mini-desc">Extracts core definitions and formulas automatically from study material.</div>
+                                    </div>
+                                </div>
+                                <div class="feature-mini-card">
+                                    <div class="feature-icon-pill purple">
+                                        <i data-lucide="layers" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="feature-mini-title">Active Recall</div>
+                                        <div class="feature-mini-desc">Interactive 3D card flips strengthen memory retrieval pathways.</div>
+                                    </div>
+                                </div>
+                                <div class="feature-mini-card">
+                                    <div class="feature-icon-pill blue">
+                                        <i data-lucide="brain" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="feature-mini-title">Exam Ready</div>
+                                        <div class="feature-mini-desc">Builds long-term retention and confidence under real exam conditions.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Flashcard Insights Card (33%) -->
+                        <div class="app-card">
+                            <div>
+                                <div class="insights-card-header">
+                                    <div class="insights-card-icon">
+                                        <i data-lucide="lightbulb" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="insights-card-title">How Flashcards Help</h3>
+                                        <p class="insights-card-sub">Proven cognitive learning methods</p>
+                                    </div>
+                                </div>
+
+                                <div class="benefit-stack">
+                                    <div class="benefit-row-item">
+                                        <div class="benefit-icon-badge">🧠</div>
+                                        <div>
+                                            <div class="benefit-heading-text">Active Recall</div>
+                                            <div class="benefit-paragraph">Testing your memory builds stronger neural pathways than passive rereading.</div>
+                                        </div>
+                                    </div>
+                                    <div class="benefit-row-item">
+                                        <div class="benefit-icon-badge">⚡</div>
+                                        <div>
+                                            <div class="benefit-heading-text">Spaced Repetition</div>
+                                            <div class="benefit-paragraph">Review formulas and definitions quickly in high-focus 5-minute study sprints.</div>
+                                        </div>
+                                    </div>
+                                    <div class="benefit-row-item">
+                                        <div class="benefit-icon-badge">📈</div>
+                                        <div>
+                                            <div class="benefit-heading-text">Targeted Practice</div>
+                                            <div class="benefit-paragraph">Rate cards to immediately spot and reinforce weak concepts before exams.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="spaced-rep-callout">
+                                <i data-lucide="shield-check" style="width: 22px; height: 22px; color: #166534; flex-shrink: 0;"></i>
+                                <div class="spaced-rep-text">
+                                    <strong>Optimal Review Interval</strong>
+                                    Reviewing at 24h, 3d, and 7d yields 92% retention rate on exam day.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: MY DECKS (Independent Decks Hub) -->
+                    <div class="my-decks-section" id="my-decks-section">
+                        <div class="decks-section-header">
+                            <div class="decks-header-left">
+                                <div class="decks-header-icon">
+                                    <i data-lucide="library" style="width: 20px; height: 20px;"></i>
+                                </div>
+                                <div>
+                                    <h2 class="decks-header-title">My Decks</h2>
+                                    <p class="decks-header-subtitle">Your saved revision decks and active practice sessions</p>
+                                </div>
+                            </div>
+                            <div class="decks-pill-badge">
+                                <span id="deck-count">0 decks ready</span>
+                            </div>
+                        </div>
+
+                        <!-- Compact, Centered Empty State -->
+                        <div id="deck-empty-view" class="decks-empty-container">
+                            <div class="decks-empty-icon-wrap">
+                                <i data-lucide="layers" style="width: 26px; height: 26px;"></i>
+                            </div>
+                            <h3 class="decks-empty-title">No flashcard decks yet</h3>
+                            <p class="decks-empty-desc">Generate your first personalized revision deck above.</p>
+                            <button type="button" class="btn-empty-generate" onclick="document.getElementById('subject').focus(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                                <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i> Generate Flashcards
+                            </button>
+                        </div>
+
+                        <!-- Ready State View: Active Hub with Summary Bar & Decks Grid -->
+                        <div id="deck-ready-view" class="deck-ready-hub" style="display: none;">
+                            <div class="deck-status-bar">
+                                <div class="deck-status-stats">
+                                    <div class="deck-stat-item">
+                                        <span class="deck-stat-lbl">Total Decks</span>
+                                        <span class="deck-stat-val" id="total-decks-count">0</span>
+                                    </div>
+                                    <div class="deck-stat-item">
+                                        <span class="deck-stat-lbl">Total Cards</span>
+                                        <span class="deck-stat-val" id="total-cards-count">0</span>
+                                    </div>
+                                    <div class="deck-stat-item">
+                                        <span class="deck-stat-lbl">Review Mode</span>
+                                        <span class="deck-stat-val" style="color: #2563EB;">Independent Decks</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Responsive Grid of Independent Decks -->
+                            <div class="decks-grid" id="decks-grid">
+                                <!-- Populated dynamically by loadDecks() -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Study View (When Reviewing In 3D Arena) -->
+                <div class="study-view-container" id="study-view" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <button id="back-btn" class="back-nav-btn" style="margin-bottom: 0;">
+                            <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> Back to Decks
+                        </button>
+                        <div id="study-deck-title" style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); text-align: right; max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            Deck Title
+                        </div>
+                    </div>
+                    
+                    <div class="study-progress-pill">
+                        Card <span id="current-idx">1</span> of <span id="total-idx">10</span>
+                    </div>
+
+                    <!-- 3D Card Scene: Question Face vs Answer Face -->
+                    <div class="scene" id="flashcard-scene" title="Click card to flip">
+                        <div class="card-inner">
+                            <div class="card-face card-face-front">
+                                <span class="card-face-tag tag-question"><i data-lucide="help-circle" style="width: 13px; height: 13px;"></i> Question</span>
+                                <div id="card-front" style="font-size: 1.5rem; font-weight: 700; max-width: 90%; margin: 1.5rem auto; line-height: 1.45;">Front</div>
+                                <div class="flip-hint-text" style="position: absolute; bottom: 1.25rem; font-size: 0.82rem; margin: 0;">
+                                    <i data-lucide="mouse-pointer-click" style="width: 15px; height: 15px;"></i> Click card or click "Reveal Answer" below to flip
+                                </div>
+                            </div>
+                            <div class="card-face card-face-back">
+                                <span class="card-face-tag tag-answer"><i data-lucide="check-circle" style="width: 13px; height: 13px;"></i> Answer</span>
+                                <div id="card-back" style="font-size: 1.25rem; font-weight: 500; max-width: 90%; margin: 1.5rem auto; line-height: 1.6;">Back</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Controls: Previous, Reveal Answer / Flip, Next -->
+                    <div class="study-controls-bar">
+                        <button type="button" id="btn-prev-card" class="btn-study-nav">
+                            <i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i> Previous Card
+                        </button>
+                        <button type="button" id="btn-flip-card" class="btn-flip-action">
+                            <i data-lucide="rotate-cw" style="width: 18px; height: 18px;"></i> <span id="btn-flip-label">Reveal Answer</span>
+                        </button>
+                        <button type="button" id="btn-next-card" class="btn-study-nav">
+                            Next Card <i data-lucide="chevron-right" style="width: 18px; height: 18px;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Recall Assessment Buttons -->
+                    <div class="rate-controls-row" id="rating-controls">
+                        <button class="btn-rate btn-rate-learning" id="btn-rate-learning" onclick="rateCard('Learning')">
+                            <i data-lucide="x-circle" style="width: 18px; height: 18px;"></i> Still Learning
+                        </button>
+                        <button class="btn-rate btn-rate-known" id="btn-rate-known" onclick="rateCard('Known')">
+                            <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i> Got it!
+                        </button>
+                    </div>
+
+                    <!-- Deck Finished Screen -->
+                    <div id="deck-finished" style="display: none; margin-top: 2rem; background: var(--bg-card); padding: 2.5rem; border-radius: var(--radius-card); border: 1px solid var(--border-color); box-shadow: var(--shadow-card);">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem;">Deck Completed!</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.92rem;">You have reviewed all cards in this deck.</p>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                            <button id="btn-restart-deck" class="btn-study-action btn-study-now">
+                                <i data-lucide="rotate-ccw" style="width: 17px; height: 17px;"></i> Study Again
+                            </button>
+                            <button id="btn-finish-back" class="btn-study-action back-nav-btn" style="margin: 0;">
+                                <i data-lucide="arrow-left" style="width: 17px; height: 17px;"></i> Back to Decks
+                            </button>
+                            <button id="btn-finish-delete" class="btn-study-action btn-discard">
+                                <i data-lucide="trash-2" style="width: 17px; height: 17px;"></i> Delete Deck
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Reusable Sidebar injection and Page Logic -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">K</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        let allDecks = [];
+        let currentDeck = null;
+        let currentCardIndex = 0;
+        let isGenerating = false;
+
+        const formatDeckDateClient = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const month = months[date.getMonth()];
+            const day = date.getDate();
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${month} ${day}, ${year} • ${hours}:${minutes} ${ampm}`;
+        };
+
+        const escapeHtml = (unsafe) => {
+            return (unsafe || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
+        const initPage = async () => {
+            renderSidebar();
+
+            // Mobile menu toggle
+            const menuBtn = document.getElementById('menu-toggle-btn');
+            const sidebarEl = document.getElementById('sidebar-container');
+            const overlayEl = document.getElementById('sidebar-overlay');
+            if (menuBtn && sidebarEl && overlayEl) {
+                menuBtn.addEventListener('click', () => {
+                    sidebarEl.classList.toggle('mobile-open');
+                    overlayEl.classList.toggle('mobile-open');
+                });
+                overlayEl.addEventListener('click', () => {
+                    sidebarEl.classList.remove('mobile-open');
+                    overlayEl.classList.remove('mobile-open');
+                });
+            }
+
+            const user = await checkAuth();
+            if (user) {
+                const nameEl = document.getElementById('sidebar-user-name');
+                const initialEl = document.getElementById('sidebar-user-initial');
+                const headerInitialEl = document.getElementById('header-user-avatar');
+                if (nameEl) nameEl.innerText = user.name;
+                if (initialEl) initialEl.innerText = user.name.charAt(0).toUpperCase();
+                if (headerInitialEl) headerInitialEl.innerText = user.name.charAt(0).toUpperCase();
+            }
+
+            await loadDecks();
+
+            // Generation form submit with duplicate prevention
+            document.getElementById('generate-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (isGenerating) return;
+
+                const btn = document.getElementById('generate-btn');
+                const originalText = btn.innerHTML;
+                isGenerating = true;
+                btn.innerHTML = '<i data-lucide="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Generating Flashcard Deck...';
+                btn.disabled = true;
+
+                const payload = {
+                    title: document.getElementById('deck-title').value.trim(),
+                    subject: document.getElementById('subject').value,
+                    topic: document.getElementById('topic').value,
+                    count: parseInt(document.getElementById('count').value)
+                };
+
+                try {
+                    const res = await apiFetch('/flashcards/generate', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (res && res.success) {
+                        alert(`New deck "${res.data.title}" generated successfully!`);
+                        document.getElementById('deck-title').value = '';
+                        document.getElementById('topic').value = '';
+                        await loadDecks();
+                        
+                        // Scroll to the newly created deck
+                        const createdEl = document.getElementById(`deck-card-${res.data._id}`);
+                        if (createdEl) {
+                            createdEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert(err.message || 'Error generating cards.');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    isGenerating = false;
+                    lucide.createIcons();
+                }
+            });
+
+            // Back to decks button
+            document.getElementById('back-btn').addEventListener('click', () => {
+                document.getElementById('study-view').style.display = 'none';
+                document.getElementById('main-view').style.display = 'flex';
+                loadDecks();
+            });
+
+            // Card click to flip
+            document.getElementById('flashcard-scene').addEventListener('click', flipCard);
+
+            // Controls bar buttons
+            document.getElementById('btn-flip-card').addEventListener('click', flipCard);
+            document.getElementById('btn-prev-card').addEventListener('click', prevCard);
+            document.getElementById('btn-next-card').addEventListener('click', nextCard);
+
+            // Finished screen buttons
+            document.getElementById('btn-restart-deck').addEventListener('click', () => {
+                if (!currentDeck) return;
+                currentCardIndex = 0;
+                document.getElementById('deck-finished').style.display = 'none';
+                document.getElementById('flashcard-scene').style.display = 'block';
+                document.querySelector('.study-controls-bar').style.display = 'flex';
+                document.getElementById('rating-controls').style.display = 'flex';
+                document.querySelector('.study-progress-pill').style.display = 'inline-block';
+                showCard();
+            });
+            document.getElementById('btn-finish-back').addEventListener('click', () => {
+                document.getElementById('study-view').style.display = 'none';
+                document.getElementById('main-view').style.display = 'flex';
+                loadDecks();
+            });
+            document.getElementById('btn-finish-delete').addEventListener('click', async () => {
+                if (!currentDeck) return;
+                await deleteSpecificDeck(currentDeck._id, currentDeck.title);
+                document.getElementById('study-view').style.display = 'none';
+                document.getElementById('main-view').style.display = 'flex';
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+
+        async function loadDecks() {
+            try {
+                const res = await apiFetch('/flashcards/decks');
+                if (res && res.data) {
+                    allDecks = res.data;
+                    const totalDecks = allDecks.length;
+                    const totalCards = allDecks.reduce((sum, d) => sum + (d.cards ? d.cards.length : (d.cardCount || 0)), 0);
+
+                    const deckCountPill = document.getElementById('deck-count');
+                    if (deckCountPill) {
+                        deckCountPill.innerText = `${totalDecks} deck${totalDecks === 1 ? '' : 's'} (${totalCards} cards)`;
+                    }
+
+                    const totalDecksCountEl = document.getElementById('total-decks-count');
+                    if (totalDecksCountEl) totalDecksCountEl.innerText = totalDecks;
+
+                    const totalCardsCountEl = document.getElementById('total-cards-count');
+                    if (totalCardsCountEl) totalCardsCountEl.innerText = totalCards;
+
+                    const emptyView = document.getElementById('deck-empty-view');
+                    const readyView = document.getElementById('deck-ready-view');
+                    const decksGrid = document.getElementById('decks-grid');
+
+                    if (totalDecks > 0) {
+                        if (emptyView) emptyView.style.display = 'none';
+                        if (readyView) readyView.style.display = 'flex';
+
+                        if (decksGrid) {
+                            decksGrid.innerHTML = allDecks.map(deck => {
+                                const cardCount = deck.cards ? deck.cards.length : (deck.cardCount || 0);
+                                const knownCount = deck.cards ? deck.cards.filter(c => c.status === 'Known').length : 0;
+                                const dateFormatted = formatDeckDateClient(deck.createdAt);
+
+                                return `
+                                    <div class="deck-card" id="deck-card-${deck._id}">
+                                        <div class="deck-card-top">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="badge-chip">${escapeHtml(deck.subject)}</span>
+                                                <span class="deck-date-text">${dateFormatted}</span>
+                                            </div>
+                                            <button class="btn-deck-delete" data-deck-id="${deck._id}" data-deck-title="${escapeHtml(deck.title)}" title="Delete Deck">
+                                                <i data-lucide="trash-2" style="width: 15px; height: 15px;"></i>
+                                            </button>
+                                        </div>
+
+                                        <div>
+                                            <h3 class="deck-card-title">${escapeHtml(deck.title)}</h3>
+                                            ${deck.topic ? `<div class="deck-topic-row"><i data-lucide="tag" style="width: 13px; height: 13px;"></i> ${escapeHtml(deck.topic)}</div>` : ''}
+                                        </div>
+
+                                        <div class="deck-card-meta">
+                                            <span class="deck-meta-pill">
+                                                <i data-lucide="layers" style="width: 14px; height: 14px;"></i> ${cardCount} Cards
+                                            </span>
+                                            ${knownCount > 0 ? `
+                                                <span class="deck-meta-pill known-pill">
+                                                    <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> ${knownCount}/${cardCount} Mastered
+                                                </span>
+                                            ` : ''}
+                                        </div>
+
+                                        <div class="deck-card-actions">
+                                            <button class="btn-study-deck" data-deck-id="${deck._id}">
+                                                <i data-lucide="play" style="width: 15px; height: 15px;"></i> Study Deck
+                                            </button>
+                                            <button class="btn-preview-deck" data-deck-id="${deck._id}">
+                                                <i data-lucide="eye" style="width: 15px; height: 15px;"></i> Preview
+                                            </button>
+                                        </div>
+
+                                        <div class="deck-preview-panel" id="preview-panel-${deck._id}" style="display: none;">
+                                            ${(deck.cards || []).map((c, i) => `
+                                                <div class="preview-item-row">
+                                                    <div class="preview-q-text">
+                                                        <span style="color: var(--primary-blue); font-weight: 700;">Q${i + 1}:</span> ${escapeHtml(c.front)}
+                                                    </div>
+                                                    <button type="button" class="preview-a-toggle" data-target="preview-ans-${deck._id}-${i}">
+                                                        <i data-lucide="eye" style="width: 12px; height: 12px;"></i> Show Answer
+                                                    </button>
+                                                    <div class="preview-a-text" id="preview-ans-${deck._id}-${i}">
+                                                        <strong style="color: #10B981;">Answer:</strong> ${escapeHtml(c.back)}
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+
+                            // Attach event listeners to dynamic buttons
+                            decksGrid.querySelectorAll('.btn-study-deck').forEach(btn => {
+                                btn.addEventListener('click', () => startStudyDeck(btn.getAttribute('data-deck-id')));
+                            });
+                            decksGrid.querySelectorAll('.btn-preview-deck').forEach(btn => {
+                                btn.addEventListener('click', () => toggleDeckPreview(btn.getAttribute('data-deck-id')));
+                            });
+                            decksGrid.querySelectorAll('.btn-deck-delete').forEach(btn => {
+                                btn.addEventListener('click', () => deleteSpecificDeck(btn.getAttribute('data-deck-id'), btn.getAttribute('data-deck-title')));
+                            });
+                            decksGrid.querySelectorAll('.preview-a-toggle').forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    const targetId = btn.getAttribute('data-target');
+                                    const ansEl = document.getElementById(targetId);
+                                    if (ansEl) {
+                                        const isHidden = ansEl.style.display === 'none' || ansEl.style.display === '';
+                                        ansEl.style.display = isHidden ? 'block' : 'none';
+                                        btn.innerHTML = isHidden ? '<i data-lucide="eye-off" style="width: 12px; height: 12px;"></i> Hide Answer' : '<i data-lucide="eye" style="width: 12px; height: 12px;"></i> Show Answer';
+                                        lucide.createIcons();
+                                    }
+                                });
+                            });
+                        }
+                    } else {
+                        if (emptyView) emptyView.style.display = 'flex';
+                        if (readyView) readyView.style.display = 'none';
+                    }
+                    lucide.createIcons();
+                }
+            } catch(e) {
+                console.error('Error loading decks:', e);
+            }
+        }
+
+        function toggleDeckPreview(deckId) {
+            const panel = document.getElementById(`preview-panel-${deckId}`);
+            if (panel) {
+                const isHidden = panel.style.display === 'none';
+                panel.style.display = isHidden ? 'flex' : 'none';
+            }
+        }
+
+        async function deleteSpecificDeck(deckId, deckTitle) {
+            const confirmed = confirm(`Are you sure you want to delete "${deckTitle || 'this deck'}"?\nThis will delete only this deck and its associated cards.`);
+            if (!confirmed) return;
+
+            try {
+                const res = await apiFetch(`/flashcards/decks/${deckId}`, { method: 'DELETE' });
+                if (res && res.success) {
+                    await loadDecks();
+                }
+            } catch (err) {
+                console.error(err);
+                alert(err.message || 'Failed to delete deck.');
+            }
+        }
+
+        function startStudyDeck(deckId) {
+            const targetDeck = allDecks.find(d => d._id === deckId);
+            if (!targetDeck || !targetDeck.cards || targetDeck.cards.length === 0) {
+                alert('This deck contains no flashcards to study.');
+                return;
+            }
+
+            currentDeck = targetDeck;
+            currentCardIndex = 0;
+
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('study-view').style.display = 'block';
+            document.getElementById('study-deck-title').innerText = currentDeck.title;
+            document.getElementById('deck-finished').style.display = 'none';
+            document.getElementById('flashcard-scene').style.display = 'block';
+            document.querySelector('.study-controls-bar').style.display = 'flex';
+            document.getElementById('rating-controls').style.display = 'flex';
+            document.querySelector('.study-progress-pill').style.display = 'inline-block';
+
+            showCard();
+        }
+
+        function showCard() {
+            if (!currentDeck || !currentDeck.cards || currentCardIndex >= currentDeck.cards.length) {
+                showDeckFinished();
+                return;
+            }
+
+            // CRITICAL: Always reset the card to the front (Question side)
+            const scene = document.getElementById('flashcard-scene');
+            scene.classList.remove('is-flipped');
+            document.getElementById('btn-flip-label').innerText = 'Reveal Answer';
+
+            const card = currentDeck.cards[currentCardIndex];
+            document.getElementById('card-front').innerText = card.front;
+            document.getElementById('card-back').innerText = card.back;
+
+            document.getElementById('current-idx').innerText = currentCardIndex + 1;
+            document.getElementById('total-idx').innerText = currentDeck.cards.length;
+
+            // Nav buttons state
+            const prevBtn = document.getElementById('btn-prev-card');
+            const nextBtn = document.getElementById('btn-next-card');
+            if (prevBtn) prevBtn.disabled = currentCardIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentCardIndex === currentDeck.cards.length - 1;
+
+            lucide.createIcons();
+        }
+
+        function flipCard() {
+            const scene = document.getElementById('flashcard-scene');
+            scene.classList.toggle('is-flipped');
+            const isFlipped = scene.classList.contains('is-flipped');
+            document.getElementById('btn-flip-label').innerText = isFlipped ? 'Flip to Question' : 'Reveal Answer';
+            lucide.createIcons();
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                showCard();
+            }
+        }
+
+        function nextCard() {
+            if (currentDeck && currentCardIndex < currentDeck.cards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            }
+        }
+
+        function showDeckFinished() {
+            document.getElementById('flashcard-scene').style.display = 'none';
+            document.querySelector('.study-controls-bar').style.display = 'none';
+            document.getElementById('rating-controls').style.display = 'none';
+            document.querySelector('.study-progress-pill').style.display = 'none';
+            document.getElementById('deck-finished').style.display = 'block';
+            lucide.createIcons();
+        }
+
+        window.rateCard = async (status) => {
+            if (!currentDeck || !currentDeck.cards) return;
+            const card = currentDeck.cards[currentCardIndex];
+
+            try {
+                // Background update
+                apiFetch('/flashcards/' + card._id + '/review', {
+                    method: 'PUT',
+                    body: JSON.stringify({ status })
+                });
+                card.status = status;
+            } catch(e) {
+                console.error(e);
+            }
+
+            if (currentCardIndex < currentDeck.cards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            } else {
+                showDeckFinished();
+            }
+        };
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>

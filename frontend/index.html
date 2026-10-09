@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Margdarshi - AI Study Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ── Reset & Base ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #FFFFFF;
+            color: #0F172A;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        /* ── Navbar ── */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            padding: 0 1.5rem;
+            transition: box-shadow 0.3s;
+        }
+        .navbar.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.06); }
+        .navbar-inner {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 2.5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1E3A8A;
+        }
+        .nav-brand svg { width: 28px; height: 28px; color: #3B82F6; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            background: #F1F5F9;
+            border-radius: 50px;
+            padding: 4px;
+            gap: 2px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.25s;
+        }
+        .nav-link:hover { color: #1E3A8A; background: rgba(255,255,255,0.6); }
+        .nav-link.active { background: white; color: #1E3A8A; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .nav-link-icon { width: 16px; height: 16px; }
+
+        .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .btn-login {
+            padding: 0.55rem 1.5rem;
+            border-radius: 50px;
+            border: 1.5px solid #CBD5E1;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #334155;
+            background: white;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .btn-login:hover { border-color: #3B82F6; color: #2563EB; }
+        .btn-cta {
+            padding: 0.55rem 1.5rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: white;
+            background: linear-gradient(135deg, #3B82F6, #6366F1);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s;
+        }
+        .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.4); }
+
+        /* ── Hero Section ── */
+        .hero {
+            padding: 7rem 1.5rem 4rem;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #F0F5FF 0%, #FFFFFF 60%);
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -5%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-inner {
+            width: 100%;
+            padding: 0 4%;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #3B82F6;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            color: #0F172A;
+            margin-bottom: 1.5rem;
+        }
+        .hero-title .highlight {
+            color: #3B82F6;
+            position: relative;
+            display: inline-block;
+        }
+        .hero-title .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: #64748B;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            max-width: 90%;
+        }
+
+        .hero-checklist {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2.25rem;
+            flex-wrap: wrap;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #475569;
+        }
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #6366F1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .check-icon svg { width: 12px; height: 12px; color: white; }
+
+        .hero-buttons { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 2rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #3B82F6, #4F46E5);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.35);
+            transition: all 0.3s;
+        }
+        .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(59, 130, 246, 0.45); }
+
+        .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.75rem;
+            border-radius: 14px;
+            background: white;
+            color: #0F172A;
+            font-weight: 700;
+            font-size: 1rem;
+            border: 1.5px solid #E2E8F0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-hero-secondary:hover { border-color: #93C5FD; background: #F8FAFF; transform: translateY(-1px); }
+        .play-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #6366F1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-icon svg { width: 12px; height: 12px; color: white; margin-left: 2px; }
+
+        /* ── Hero Visual (Right Side) ── */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .hero-image {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Feature Cards */
+        .floating-card {
+            position: absolute;
+            background: white;
+            border-radius: 14px;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            z-index: 5;
+            animation: floatCard 5s ease-in-out infinite;
+            border: 1px solid rgba(226,232,240,0.5);
+        }
+        .floating-card .fc-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .floating-card .fc-title { font-size: 0.78rem; font-weight: 700; color: #0F172A; line-height: 1.2; }
+        .floating-card .fc-desc { font-size: 0.68rem; color: #94A3B8; font-weight: 400; line-height: 1.3; }
+
+        .fc-ask { top: 5%; right: 30%; animation-delay: 0s; }
+        .fc-ask .fc-icon { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }
+        .fc-quiz { top: 2%; right: -5%; animation-delay: 1.2s; }
+        .fc-quiz .fc-icon { background: linear-gradient(135deg, #EDE9FE, #DDD6FE); color: #7C3AED; }
+        .fc-flash { bottom: 35%; right: -8%; animation-delay: 2.4s; }
+        .fc-flash .fc-icon { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); color: #DB2777; }
+        .fc-plan { bottom: 12%; right: -2%; animation-delay: 3.6s; }
+        .fc-plan .fc-icon { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #059669; }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ── Features Section ── */
+        .features {
+            padding: 5rem 1.5rem;
+            background: #FFFFFF;
+        }
+        .features-inner {
+            width: 100%;
+            padding: 0 3%;
+        }
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.12);
+            padding: 0.35rem 0.9rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #3B82F6;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #0F172A;
+            margin-bottom: 0.75rem;
+        }
+        .section-subtitle {
+            font-size: 1.05rem;
+            color: #64748B;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+        .feature-card {
+            background: #FAFBFE;
+            border: 1px solid #EEF2F8;
+            border-radius: 20px;
+            padding: 1.75rem 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 20px 20px 0 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 12px 35px rgba(0,0,0,0.06); }
+        .feature-card:hover::before { opacity: 1; }
+        .feature-card:nth-child(1)::before { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+        .feature-card:nth-child(2)::before { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+        .feature-card:nth-child(3)::before { background: linear-gradient(90deg, #10B981, #34D399); }
+        .feature-card:nth-child(4)::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+
+        .feature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-icon.blue { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }
+        .feature-icon.purple { background: linear-gradient(135deg, #EDE9FE, #DDD6FE); color: #7C3AED; }
+        .feature-icon.green { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #059669; }
+        .feature-icon.orange { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #D97706; }
+
+        .feature-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .feature-card:hover .feature-arrow { background: #3B82F6; border-color: #3B82F6; }
+        .feature-card:hover .feature-arrow svg { color: white; }
+        .feature-arrow svg { width: 16px; height: 16px; color: #94A3B8; transition: color 0.3s; }
+
+        .feature-title { font-size: 1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem; }
+        .feature-desc { font-size: 0.88rem; color: #64748B; line-height: 1.6; }
+
+        /* ── Stats Bar ── */
+        .stats-bar {
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, #F8FAFF 0%, #EEF2FF 100%);
+            border-top: 1px solid #E8ECF4;
+        }
+        .stats-inner {
+            width: 100%;
+            padding: 0 3%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stat-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-icon-wrap.blue { background: rgba(59,130,246,0.1); color: #2563EB; }
+        .stat-icon-wrap.purple { background: rgba(124,58,237,0.1); color: #7C3AED; }
+        .stat-icon-wrap.green { background: rgba(16,185,129,0.1); color: #059669; }
+        .stat-icon-wrap.orange { background: rgba(245,158,11,0.1); color: #D97706; }
+        .stat-text h4 { font-size: 0.92rem; font-weight: 700; color: #0F172A; }
+        .stat-text p { font-size: 0.8rem; color: #94A3B8; font-weight: 400; }
+
+        /* ── How It Works Section ── */
+        .how-it-works {
+            padding: 5rem 1.5rem;
+            background: white;
+        }
+        .how-inner {
+            width: 100%;
+            padding: 0 3%;
+            text-align: center;
+        }
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .step-card {
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+            background: #FAFBFE;
+            border: 1px solid #EEF2F8;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .step-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #6366F1);
+            color: white;
+            font-weight: 800;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+        }
+        .step-card h3 { font-size: 1.1rem; font-weight: 700; color: #0F172A; margin-bottom: 0.5rem; }
+        .step-card p { font-size: 0.88rem; color: #64748B; line-height: 1.6; }
+
+        /* ── CTA Section ── */
+        .cta-section {
+            padding: 5rem 1.5rem;
+            background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 50%, #6366F1 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .cta-inner { max-width: 600px; margin: 0 auto; position: relative; z-index: 2; }
+        .cta-section h2 { font-size: 2.25rem; font-weight: 800; color: white; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        .cta-section p { font-size: 1.05rem; color: rgba(255,255,255,0.75); margin-bottom: 2rem; }
+        .btn-cta-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 1rem 2.5rem;
+            border-radius: 14px;
+            background: white;
+            color: #2563EB;
+            font-weight: 800;
+            font-size: 1.05rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+        }
+        .btn-cta-large:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+
+        /* ── Footer ── */
+        .footer {
+            padding: 3rem 1.5rem;
+            background: #0B1120;
+            text-align: center;
+        }
+        .footer-inner { width: 100%; padding: 0 3%; }
+        .footer-brand { font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.5rem; }
+        .footer p { color: #64748B; font-size: 0.85rem; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .hero-inner { grid-template-columns: 1fr; text-align: center; }
+            .hero-subtitle { margin: 0 auto 1.5rem; }
+            .hero-checklist { justify-content: center; }
+            .hero-buttons { justify-content: center; }
+            .hero-visual { margin-top: 2rem; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid { grid-template-columns: 1fr; max-width: 480px; margin: 3rem auto 0; }
+            .floating-card { display: none; }
+        }
+        @media (max-width: 640px) {
+            .hero-title { font-size: 2.25rem; }
+            .nav-links { display: none; }
+            .features-grid { grid-template-columns: 1fr; }
+            .stats-inner { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <a href="index.html" class="nav-brand">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.084a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+                Margdarshi
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link active">
+                    <svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Home
+                </a>
+                <a href="#features" class="nav-link">
+                    <svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                    Features
+                </a>
+                <a href="#how-it-works" class="nav-link">
+                    <svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    How It Works
+                </a>
+                <a href="#about" class="nav-link">
+                    <svg class="nav-link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    About
+                </a>
+            </div>
+            <div class="nav-actions">
+                <a href="login.html" class="btn-login">Login</a>
+                <a href="register.html" class="btn-cta">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ══════════ HERO ══════════ -->
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <div class="hero-badge">✨ Your Personal AI Study Assistant</div>
+                <h1 class="hero-title">
+                    Learn Smarter With<br>
+                    <span class="highlight">Margdarshi</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Your AI study companion for understanding notes, practicing concepts, and tracking your learning — all in one place.
+                </p>
+                <div class="hero-checklist">
+                    <div class="checklist-item">
+                        <div class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                        Upload your notes
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                        Get instant answers
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                        Study smarter
+                    </div>
+                </div>
+                <div class="hero-buttons">
+                    <a href="register.html" class="btn-hero-primary">
+                        Get Started Free
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                    <a href="#how-it-works" class="btn-hero-secondary">
+                        <div class="play-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                        See How It Works
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <img src="assets/hero-robot.jpg" alt="Margdarshi AI Robot Assistant" class="hero-image">
+
+                <!-- Floating Cards -->
+                <div class="floating-card fc-ask">
+                    <div class="fc-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div>
+                        <div class="fc-title">Ask Anything</div>
+                        <div class="fc-desc">Explain this topic in simple words...</div>
+                    </div>
+                </div>
+                <div class="floating-card fc-quiz">
+                    <div class="fc-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    </div>
+                    <div>
+                        <div class="fc-title">Generate Quiz</div>
+                        <div class="fc-desc">Create practice questions from my notes</div>
+                    </div>
+                </div>
+                <div class="floating-card fc-flash">
+                    <div class="fc-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+                    </div>
+                    <div>
+                        <div class="fc-title">Create Flashcards</div>
+                        <div class="fc-desc">Turn key points into flashcards</div>
+                    </div>
+                </div>
+                <div class="floating-card fc-plan">
+                    <div class="fc-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div>
+                        <div class="fc-title">Plan My Study</div>
+                        <div class="fc-desc">Make a study schedule for my exams</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ FEATURES ══════════ -->
+    <section class="features" id="features">
+        <div class="features-inner" style="text-align: center;">
+            <div class="section-badge">✨ Features</div>
+            <h2 class="section-title">All-in-One Study Platform</h2>
+            <p class="section-subtitle">Everything you need to study, practice and improve — powered by AI.</p>
+
+            <div class="features-grid" style="text-align: left;">
+                <div class="feature-card">
+                    <div class="feature-header">
+                        <div class="feature-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <div class="feature-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">AI Chat with Your Notes</h3>
+                    <p class="feature-desc">Upload your study material and ask questions. Get instant, accurate answers with citations.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-header">
+                        <div class="feature-icon purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        </div>
+                        <div class="feature-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Adaptive Quizzes</h3>
+                    <p class="feature-desc">Generate quizzes from your notes, identify weak topics, and track your progress.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-header">
+                        <div class="feature-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+                        </div>
+                        <div class="feature-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Smart Flashcards</h3>
+                    <p class="feature-desc">Review key concepts easily. The AI extracts important information and turns them into flashcards.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-header">
+                        <div class="feature-icon orange">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                        </div>
+                        <div class="feature-arrow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Study Planner</h3>
+                    <p class="feature-desc">Input your exam dates and let AI create a personalized study schedule.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ STATS BAR ══════════ -->
+    <section class="stats-bar">
+        <div class="stats-inner">
+            <div class="stat-item">
+                <div class="stat-icon-wrap blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <div class="stat-text">
+                    <h4>Smart Learning</h4>
+                    <p>From your own notes</p>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div class="stat-text">
+                    <h4>4+ Powerful AI Features</h4>
+                    <p>All-in-one platform</p>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap green">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-text">
+                    <h4>Better Understanding</h4>
+                    <p>Concepts made simple</p>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon-wrap orange">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </div>
+                <div class="stat-text">
+                    <h4>Personalized Plan</h4>
+                    <p>Tailored to your goals</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ HOW IT WORKS ══════════ -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="how-inner">
+            <div class="section-badge">📘 How It Works</div>
+            <h2 class="section-title">Get Started in 3 Easy Steps</h2>
+            <p class="section-subtitle">From uploading your notes to acing your exams — Margdarshi guides you every step of the way.</p>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Upload Your Notes</h3>
+                    <p>Upload PDFs, DOCX, or text files of your study material. Margdarshi processes and understands them instantly.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Learn with AI</h3>
+                    <p>Ask questions, take quizzes, review flashcards, and get personalized explanations from your own material.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Track & Improve</h3>
+                    <p>Monitor your progress, identify weak areas, and follow a smart study plan to achieve your goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ CTA ══════════ -->
+    <section class="cta-section" id="about">
+        <div class="cta-inner">
+            <h2>Ready to Study Smarter?</h2>
+            <p>Join Margdarshi today and transform the way you learn. It's free to get started.</p>
+            <a href="register.html" class="btn-cta-large">
+                Get Started Free
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- ══════════ FOOTER ══════════ -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">🎓 Margdarshi</div>
+            <p>&copy; 2026 Margdarshi. Your AI Study Companion.</p>
+        </div>
+    </footer>
+
+    <!-- ══════════ SCROLL EFFECT ══════════ -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

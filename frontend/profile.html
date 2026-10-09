@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Margdarshi</title>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .profile-container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        .profile-hero-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-header-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-circle {
+            width: 104px;
+            height: 104px;
+            min-width: 104px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.75rem;
+            font-weight: 800;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+            border: 4px solid var(--bg-card);
+        }
+
+        .details-grid {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.75rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .detail-item-box {
+            padding: 1.1rem 1.25rem;
+            background: var(--bg-page);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .overview-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-overview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-overview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header" style="padding: 1.25rem 28px; width: 100%; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border-bottom: 1px solid var(--border-color); flex-shrink: 0; gap: 1.5rem;">
+                <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1 style="font-size: 1.65rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; line-height: 1.2;">My Profile</h1>
+                        <p style="font-size: 0.92rem; color: var(--text-secondary); margin: 0;">Your account and learning overview</p>
+                    </div>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <button id="logout-btn" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.1rem; border-radius: 10px; font-weight: 600; font-size: 0.88rem;">
+                        <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Profile Page Workspace -->
+            <div class="profile-container">
+                
+                <!-- SECTION 1: USER PROFILE HERO CARD -->
+                <div class="profile-hero-card">
+                    <div class="profile-header-meta">
+                        <div class="profile-avatar-circle" id="profile-avatar">
+                            K
+                        </div>
+                        <div style="flex: 1; min-width: 240px;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.4rem;">
+                                <h2 id="profile-name" style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin: 0;">Loading...</h2>
+                                <span style="font-size: 0.78rem; font-weight: 700; color: #2563EB; background: var(--primary-light); padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--primary-border); display: inline-flex; align-items: center; gap: 0.35rem;">
+                                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Student
+                                </span>
+                            </div>
+                            <p id="profile-email" style="font-size: 0.98rem; color: var(--text-secondary); margin: 0 0 1rem 0;">...</p>
+                            <div style="display: flex; gap: 1.5rem; color: var(--text-muted); font-size: 0.86rem; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 0.4rem;"><i data-lucide="check-circle-2" style="width: 15px; height: 15px; color: #10B981;"></i> Account Active</span>
+                                <span style="display: flex; align-items: center; gap: 0.4rem;"><i data-lucide="sparkles" style="width: 15px; height: 15px; color: #2563EB;"></i> Margdarshi AI Engine</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Read-Only Account Details Grid -->
+                    <div class="details-grid">
+                        <div class="detail-item-box">
+                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.4rem;">
+                                <i data-lucide="user" style="width: 14px; height: 14px; color: #2563EB;"></i> Full Name
+                            </span>
+                            <span id="detail-name" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Loading...</span>
+                        </div>
+
+                        <div class="detail-item-box">
+                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.4rem;">
+                                <i data-lucide="mail" style="width: 14px; height: 14px; color: #2563EB;"></i> Email Address
+                            </span>
+                            <span id="detail-email" style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); word-break: break-all;">Loading...</span>
+                        </div>
+
+                        <div class="detail-item-box">
+                            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.4rem;">
+                                <i data-lucide="shield" style="width: 14px; height: 14px; color: #2563EB;"></i> Account Role
+                            </span>
+                            <span style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">Student</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: LEARNING OVERVIEW -->
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    <div>
+                        <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Learning Overview</h3>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">Real-time statistics derived from your study activity</p>
+                    </div>
+
+                    <!-- 5 Key Statistic Cards -->
+                    <div class="overview-stats-grid">
+                        <!-- Documents Uploaded -->
+                        <div class="stat-overview-card">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Documents Uploaded</span>
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: #2563EB; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="file-text" style="width: 20px; height: 20px;"></i>
+                                </div>
+                            </div>
+                            <div id="stat-docs" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">0</div>
+                        </div>
+
+                        <!-- Quizzes Completed -->
+                        <div class="stat-overview-card">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Quizzes Completed</span>
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); color: #10B981; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                                </div>
+                            </div>
+                            <div id="stat-quizzes" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">0</div>
+                        </div>
+
+                        <!-- Study Streak -->
+                        <div class="stat-overview-card">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Study Streak</span>
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(245, 158, 11, 0.1); color: #F59E0B; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="flame" style="width: 20px; height: 20px;"></i>
+                                </div>
+                            </div>
+                            <div id="stat-streak" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">0 days</div>
+                        </div>
+
+                        <!-- Study Hours -->
+                        <div class="stat-overview-card">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Study Hours</span>
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(124, 58, 237, 0.1); color: #7C3AED; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+                                </div>
+                            </div>
+                            <div id="stat-hours" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">0 hrs</div>
+                        </div>
+
+                        <!-- Overall Progress -->
+                        <div class="stat-overview-card">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Overall Progress</span>
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(5, 150, 105, 0.1); color: #059669; display: flex; align-items: center; justify-content: center;">
+                                    <i data-lucide="trending-up" style="width: 20px; height: 20px;"></i>
+                                </div>
+                            </div>
+                            <div id="stat-progress" style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary);">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Injection -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">K</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderSidebar();
+            
+            const user = await checkAuth();
+            if (user) {
+                const initial = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                document.getElementById('profile-name').innerText = user.name || 'Student';
+                document.getElementById('profile-email').innerText = user.email || '';
+                document.getElementById('profile-avatar').innerText = initial;
+                
+                document.getElementById('detail-name').innerText = user.name || 'Student';
+                document.getElementById('detail-email').innerText = user.email || '';
+
+                const sidebarName = document.getElementById('sidebar-user-name');
+                const sidebarInitial = document.getElementById('sidebar-user-initial');
+                if (sidebarName) sidebarName.innerText = user.name || 'Student';
+                if (sidebarInitial) sidebarInitial.innerText = initial;
+            }
+
+            // Fetch Real Learning Overview Statistics
+            try {
+                const res = await apiFetch('/progress');
+                const p = res?.data || res || {};
+                const overview = p.overview || {};
+                const docCount = overview.totalDocuments ?? p.documentsUploaded ?? 0;
+                const quizCount = overview.quizzesCompleted ?? p.quizzesCompleted ?? 0;
+                const streak = overview.studyStreak ?? p.studyStreak ?? 0;
+                const hours = overview.totalStudyTime ?? p.totalStudyHours ?? 0;
+                const accuracy = overview.overallAccuracy ?? p.averageAccuracy ?? 0;
+
+                if (document.getElementById('stat-docs')) {
+                    document.getElementById('stat-docs').innerText = docCount;
+                }
+                if (document.getElementById('stat-quizzes')) {
+                    document.getElementById('stat-quizzes').innerText = quizCount;
+                }
+                if (document.getElementById('stat-streak')) {
+                    document.getElementById('stat-streak').innerText = `${streak} ${streak === 1 ? 'day' : 'days'}`;
+                }
+                if (document.getElementById('stat-hours')) {
+                    document.getElementById('stat-hours').innerText = `${hours} hrs`;
+                }
+                if (document.getElementById('stat-progress')) {
+                    document.getElementById('stat-progress').innerText = `${Math.round(accuracy)}%`;
+                }
+            } catch (err) {
+                console.error('Could not load profile learning stats:', err);
+            }
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+            if (window.lucide) window.lucide.createIcons();
+        });
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>

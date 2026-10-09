@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Documents - Margdarshi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/variables.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            --border-color: #E2E8F0;
+            --border-hover: #CBD5E1;
+            --primary-blue: #2563EB;
+            --primary-hover: #1D4ED8;
+            --primary-light: #EFF6FF;
+            --primary-border: #BFDBFE;
+            --radius-card: 14px;
+            --radius-input: 10px;
+            --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --shadow-card: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -2px rgba(15, 23, 42, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px;
+            min-width: 240px;
+            background: linear-gradient(180deg, #09132D 0%, #0D1C48 55%, #15358E 100%);
+            color: #94A3B8;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.15rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 2rem;
+            padding: 0 0.5rem;
+        }
+        .sidebar-brand i { color: #60A5FA; }
+        .sidebar-brand-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(96, 165, 250, 0.2);
+            color: #93C5FD;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.75);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.92rem;
+            transition: all 0.15s ease;
+        }
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .nav-item.active {
+            background: #2563EB;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .nav-item i { width: 19px; height: 19px; flex-shrink: 0; }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            margin-top: auto;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sidebar-user:hover { background: rgba(255, 255, 255, 0.1); }
+        .sidebar-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .sidebar-user-info { flex: 1; overflow: hidden; }
+        .sidebar-user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sidebar-user-role { font-size: 0.78rem; color: #94A3B8; }
+
+        /* ── Mobile Overlay ── */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        /* ── Main Area ── */
+        .main-wrapper {
+            flex: 1;
+            width: calc(100% - 240px);
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--bg-page);
+            position: relative;
+        }
+        .main-wrapper::-webkit-scrollbar { width: 6px; }
+        .main-wrapper::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* ── Top Header ── */
+        .top-header {
+            padding: 1.25rem 28px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            gap: 1.5rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .header-title-block h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+        .header-title-block p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .header-search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .header-search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+        }
+        .header-search-input {
+            height: 42px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-input);
+            padding: 0 1rem 0 2.4rem;
+            font-size: 0.86rem;
+            color: var(--text-primary);
+            width: 220px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .header-search-input:focus {
+            background: var(--bg-card);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            width: 260px;
+        }
+        .btn-header-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.15rem;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border-radius: var(--radius-input);
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-header-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+        .menu-toggle-btn {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        /* ── Full Width Page Content ── */
+        .page-content {
+            padding: 24px 28px 36px;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* ── SECTION 1: 4 LARGE HIGH-IMPACT KPI CARDS ── */
+        .kpi-row-4 {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+        .kpi-card-hero {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.35rem 1.5rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 142px;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .kpi-card-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+            border-color: var(--border-hover);
+        }
+        .kpi-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .kpi-icon-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+        }
+        .kpi-icon-pill.blue { background: linear-gradient(135deg, #3B82F6, #1D4ED8); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .kpi-icon-pill.purple { background: linear-gradient(135deg, #8B5CF6, #6D28D9); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2); }
+        .kpi-icon-pill.orange { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        .kpi-icon-pill.green { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+
+        .kpi-badge-trend {
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .trend-blue { background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; }
+        .trend-purple { background: #F5F3FF; color: #7C3AED; border: 1px solid #EDE9FE; }
+        .trend-orange { background: #FFFBEB; color: #D97706; border: 1px solid #FEF3C7; }
+        .trend-green { background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5; }
+
+        .kpi-num-large {
+            font-size: 2.15rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+            letter-spacing: -0.025em;
+        }
+        .kpi-label-text {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 3px;
+        }
+        .kpi-sub-context {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── SECTION 2: UPLOAD DROPZONE AREA ── */
+        .upload-section-card {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.25rem 1.5rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .upload-section-card:hover, .upload-section-card.dragover {
+            border-color: var(--primary-blue);
+            background: var(--primary-light);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+        }
+        .upload-cloud-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.65rem;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+        }
+        .upload-title-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        .upload-desc-text {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.85rem;
+        }
+        .upload-desc-text span {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+        .btn-choose-files {
+            padding: 0.55rem 1.25rem;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: white;
+            border-radius: var(--radius-input);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-choose-files:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        }
+        .upload-formats-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.65rem;
+        }
+
+        /* ── SECTION 3: LIBRARY CONTROLS & FILTER BAR ── */
+        .library-bar-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 4px;
+        }
+        .library-heading-group h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+        }
+        .library-heading-group p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .filter-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+        }
+        .filters-pill-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-pill {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.45rem 1rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .filter-pill:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+        .filter-pill.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        .filter-pill.active i { color: white !important; }
+
+        .sort-control-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .sort-select {
+            height: 38px;
+            padding: 0 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .sort-select:focus { border-color: var(--primary-blue); }
+
+        /* ── SECTION 4: DOCUMENTS GRID ── */
+        .docs-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+            width: 100%;
+        }
+
+        .doc-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 1.35rem 1.45rem;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-card);
+            border-color: var(--border-hover);
+        }
+        .doc-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.85rem;
+        }
+        .doc-type-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .doc-type-icon.pdf { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .doc-type-icon.doc { background: rgba(37, 99, 235, 0.15); color: #60A5FA; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .doc-type-icon.img { background: rgba(139, 92, 246, 0.15); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .doc-type-icon.default { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .status-badge-ready {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-badge-ready .dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
+
+        .doc-title-line {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .doc-subject-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .doc-meta-pills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.15rem;
+        }
+        .meta-pill {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.25rem 0.55rem;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .doc-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.85rem;
+        }
+        .doc-action-btn {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .doc-action-btn.preview:hover {
+            color: var(--primary-blue);
+            border-color: var(--primary-border);
+            background: var(--primary-light);
+        }
+        .doc-action-btn.download:hover {
+            color: #10B981;
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.15);
+        }
+        .doc-action-btn.delete {
+            color: #EF4444;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        .doc-action-btn.delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        /* ── Standard Compact Empty State ── */
+        .empty-state-compact {
+            background: var(--bg-card);
+            border: 1.5px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.6rem;
+            grid-column: 1 / -1;
+            min-height: 200px;
+        }
+        .empty-icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+        }
+        .empty-title-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .empty-sub-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            max-width: 320px;
+            line-height: 1.45;
+        }
+
+        /* ── Upload Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--bg-card);
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .modal-close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; }
+        .modal-close-btn:hover { color: var(--text-primary); }
+        .form-group-modal { margin-bottom: 1.25rem; }
+        .form-label-modal { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.4rem; display: block; }
+        .modal-input {
+            width: 100%;
+            height: 46px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-input);
+            padding: 0 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-input:focus { border-color: var(--primary-blue); }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .kpi-row-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .docs-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .main-wrapper { width: 100%; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-overlay.mobile-open { display: block; }
+            .menu-toggle-btn { display: flex; }
+            .kpi-row-4 { grid-template-columns: 1fr; }
+            .docs-card-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 1rem; }
+            .page-content { padding: 1rem; }
+            .header-search-wrap { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div style="display: flex; width: 100%; height: 100%;">
+        <!-- Mobile Sidebar Backdrop -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar-container"></aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle-btn" id="menu-toggle-btn" title="Toggle navigation">
+                        <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1>My Documents</h1>
+                        <p>Upload, organize and manage your study materials with AI.</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-search-wrap">
+                        <i data-lucide="search" class="header-search-icon"></i>
+                        <input type="text" id="doc-search" class="header-search-input" placeholder="Search documents...">
+                    </div>
+                    <button class="btn-header-cta" id="trigger-browse">
+                        <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+                        <span>Upload File</span>
+                    </button>
+                    <button class="header-icon-btn dark-mode-toggle" id="theme-toggle-btn" title="Toggle theme">
+                        <i data-lucide="moon" id="theme-toggle-icon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <div class="header-avatar" id="header-user-avatar" style="cursor: pointer;" onclick="window.location.href='profile.html'">K</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- SECTION 1: 4 LARGE HIGH-IMPACT KPI CARDS -->
+                <div class="kpi-row-4">
+                    <!-- KPI 1: Total Documents -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill blue">
+                                <i data-lucide="file-text" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-blue">All Files</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="stat-total">0</div>
+                            <div class="kpi-label-text">Total Documents</div>
+                            <div class="kpi-sub-context">Indexed &amp; ready for AI</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: PDF Files -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill purple">
+                                <i data-lucide="file" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-purple">Textbooks &amp; Slides</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="stat-pdfs">0</div>
+                            <div class="kpi-label-text">PDF Files</div>
+                            <div class="kpi-sub-context">Structured course material</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Images -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill orange">
+                                <i data-lucide="image" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-orange">Diagrams</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="stat-images">0</div>
+                            <div class="kpi-label-text">Image Files</div>
+                            <div class="kpi-sub-context">Handwritten notes &amp; charts</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Other Files -->
+                    <div class="kpi-card-hero">
+                        <div class="kpi-card-top">
+                            <div class="kpi-icon-pill green">
+                                <i data-lucide="folder" style="width: 24px; height: 24px;"></i>
+                            </div>
+                            <span class="kpi-badge-trend trend-green">Notes &amp; Docs</span>
+                        </div>
+                        <div>
+                            <div class="kpi-num-large" id="stat-other">0</div>
+                            <div class="kpi-label-text">Other Materials</div>
+                            <div class="kpi-sub-context">Text notes &amp; syllabus sheets</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: UPLOAD DROPZONE -->
+                <div class="upload-section-card" id="drop-zone">
+                    <div class="upload-cloud-icon-circle">
+                        <i data-lucide="upload-cloud" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <div class="upload-title-text">Upload More Documents</div>
+                    <div class="upload-desc-text">Drag and drop your study files here, or <span>click to browse</span>.</div>
+                    <button type="button" class="btn-choose-files" id="choose-files-btn">
+                        <i data-lucide="folder-plus" style="width: 16px; height: 16px;"></i>
+                        <span>Choose Files</span>
+                    </button>
+                    <div class="upload-formats-hint">Supported formats: PDF, DOC, TXT, PNG, JPG &bull; Maximum file size: 25MB</div>
+                </div>
+
+                <!-- SECTION 3: LIBRARY BAR & CATEGORY FILTERS -->
+                <div class="library-bar-wrapper">
+                    <div class="filter-controls-row">
+                        <div>
+                            <div class="library-heading-group">
+                                <h2>Document Library</h2>
+                                <p>Manage and filter your uploaded study files</p>
+                            </div>
+                        </div>
+
+                        <div class="sort-control-wrap">
+                            <span>Sort By:</span>
+                            <select id="sort-select" class="sort-select">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="name">Alphabetical (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filters-pill-group" id="filters-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- SECTION 4: DOCUMENTS GRID -->
+                <div class="docs-card-grid" id="docs-container">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Study Material</h3>
+                <button class="modal-close-btn" id="close-upload-modal"><i data-lucide="x" style="width: 20px; height: 20px;"></i></button>
+            </div>
+            <form id="upload-form">
+                <div class="form-group-modal">
+                    <label class="form-label-modal">Select Document File</label>
+                    <input type="file" id="file" class="modal-input" style="padding-top: 8px;" required accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg">
+                </div>
+                <div class="form-group-modal">
+                    <label class="form-label-modal">Subject / Course Name</label>
+                    <input type="text" id="subject" class="modal-input" placeholder="e.g. Computer Science, History" required>
+                </div>
+                <button type="submit" class="btn-choose-files" id="upload-btn" style="width: 100%; justify-content: center; height: 46px;">
+                    <i data-lucide="upload" style="width: 16px; height: 16px;"></i>
+                    <span>Upload Document</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reusable Sidebar injection and Page Logic -->
+    <script type="module">
+        import { checkAuth, logout } from './js/auth.js';
+        import { apiFetch } from './js/api.js';
+
+        let allDocs = [];
+        let currentFilter = 'all';
+        let currentSort = 'newest';
+        let searchQuery = '';
+
+        window.setFilter = (filter) => {
+            currentFilter = filter;
+            renderDocsUI();
+        };
+
+        const renderSidebar = () => {
+            const sidebar = document.getElementById('sidebar-container');
+            const path = window.location.pathname;
+            sidebar.innerHTML = `
+                <div class="sidebar-brand">
+                    <i data-lucide="graduation-cap"></i> Margdarshi
+                    <span class="sidebar-brand-tag">AI</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="dashboard.html" class="nav-item ${path.includes('dashboard') ? 'active' : ''}"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+                    <a href="chat.html" class="nav-item ${path.includes('chat') ? 'active' : ''}"><i data-lucide="message-square"></i> AI Tutor</a>
+                    <a href="documents.html" class="nav-item ${path.includes('documents') ? 'active' : ''}"><i data-lucide="file-text"></i> My Documents</a>
+                    <a href="quizzes.html" class="nav-item ${path.includes('quizzes') ? 'active' : ''}"><i data-lucide="check-circle"></i> Quizzes</a>
+                    <a href="flashcards.html" class="nav-item ${path.includes('flashcards') ? 'active' : ''}"><i data-lucide="layers"></i> Flashcards</a>
+                    <a href="planner.html" class="nav-item ${path.includes('planner') ? 'active' : ''}"><i data-lucide="calendar"></i> Study Planner</a>
+                    <a href="progress.html" class="nav-item ${path.includes('progress') ? 'active' : ''}"><i data-lucide="trending-up"></i> Progress</a>
+                </nav>
+                <div class="sidebar-user" onclick="window.location.href='profile.html'">
+                    <div class="sidebar-avatar" id="sidebar-user-initial">K</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name" id="sidebar-user-name">Loading...</div>
+                        <div class="sidebar-user-role">Student</div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        const getFileExtension = (filename) => {
+            if (!filename) return '';
+            return filename.split('.').pop().toLowerCase();
+        };
+
+        const getDocTypeClass = (filename) => {
+            const ext = getFileExtension(filename);
+            if (ext === 'pdf') return 'pdf';
+            if (['doc', 'docx'].includes(ext)) return 'doc';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'img';
+            return 'default';
+        };
+
+        let pollingTimer = null;
+        const loadDocuments = async () => {
+            try {
+                const res = await apiFetch('/documents');
+                allDocs = res.data || [];
+                renderDocsUI();
+
+                // If any document is still processing, poll again in 3 seconds
+                if (allDocs.some(d => d.status === 'PROCESSING')) {
+                    if (pollingTimer) clearTimeout(pollingTimer);
+                    pollingTimer = setTimeout(loadDocuments, 3000);
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        };
+
+        const getStatusBadge = (doc) => {
+            const status = (doc.status || 'READY').toUpperCase();
+            if (status === 'INDEXED' || status === 'READY') {
+                return `
+                    <div class="status-badge-ready" title="Indexed and ready for AI context">
+                        <span class="dot" style="background: #10B981;"></span>
+                        <span>READY</span>
+                    </div>
+                `;
+            } else if (status === 'PROCESSING') {
+                return `
+                    <div class="status-badge-ready" style="background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A;" title="Extracting text and generating embeddings...">
+                        <span class="dot" style="background: #F59E0B; animation: pulse 1.5s infinite;"></span>
+                        <span>PROCESSING</span>
+                    </div>
+                `;
+            } else if (status === 'FAILED') {
+                return `
+                    <div class="status-badge-ready" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA;" title="${doc.errorMessage || 'Failed to process document'}">
+                        <span class="dot" style="background: #EF4444;"></span>
+                        <span>FAILED</span>
+                    </div>
+                `;
+            }
+            return `
+                <div class="status-badge-ready">
+                    <span class="dot"></span>
+                    <span>${status}</span>
+                </div>
+            `;
+        };
+
+        const renderDocsUI = () => {
+            const container = document.getElementById('docs-container');
+
+            let pdfCount = 0;
+            let notesCount = 0;
+            let imageCount = 0;
+            let otherCount = 0;
+
+            const isNotesExt = ext => ['txt', 'md', 'doc', 'docx', 'rtf'].includes(ext);
+
+            allDocs.forEach(d => {
+                const ext = getFileExtension(d.originalName);
+                if (ext === 'pdf') pdfCount++;
+                else if (isNotesExt(ext)) notesCount++;
+                else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) imageCount++;
+                else otherCount++;
+            });
+
+            // Update stats numbers
+            const elTotal = document.getElementById('stat-total');
+            const elImages = document.getElementById('stat-images');
+            const elPdfs = document.getElementById('stat-pdfs');
+            const elOther = document.getElementById('stat-other');
+
+            if (elTotal) elTotal.innerText = allDocs.length;
+            if (elImages) elImages.innerText = imageCount;
+            if (elPdfs) elPdfs.innerText = pdfCount;
+            if (elOther) elOther.innerText = notesCount + otherCount;
+
+            // Update filter pills
+            const filtersEl = document.getElementById('filters-container');
+            if (filtersEl) {
+                filtersEl.innerHTML = `
+                    <div class="filter-pill ${currentFilter === 'all' ? 'active' : ''}" onclick="window.setFilter('all')">
+                        <i data-lucide="folder" style="width: 14px; height: 14px; color: ${currentFilter === 'all' ? '#ffffff' : '#2563EB'};"></i> All Documents (${allDocs.length})
+                    </div>
+                    <div class="filter-pill ${currentFilter === 'pdf' ? 'active' : ''}" onclick="window.setFilter('pdf')">
+                        <i data-lucide="file-text" style="width: 14px; height: 14px; color: ${currentFilter === 'pdf' ? '#ffffff' : '#EF4444'};"></i> PDF (${pdfCount})
+                    </div>
+                    <div class="filter-pill ${currentFilter === 'notes' ? 'active' : ''}" onclick="window.setFilter('notes')">
+                        <i data-lucide="edit-3" style="width: 14px; height: 14px; color: ${currentFilter === 'notes' ? '#ffffff' : '#F59E0B'};"></i> Notes (${notesCount})
+                    </div>
+                    <div class="filter-pill ${currentFilter === 'images' ? 'active' : ''}" onclick="window.setFilter('images')">
+                        <i data-lucide="image" style="width: 14px; height: 14px; color: ${currentFilter === 'images' ? '#ffffff' : '#8B5CF6'};"></i> Images (${imageCount})
+                    </div>
+                    <div class="filter-pill ${currentFilter === 'other' ? 'active' : ''}" onclick="window.setFilter('other')">
+                        <i data-lucide="folder-plus" style="width: 14px; height: 14px; color: ${currentFilter === 'other' ? '#ffffff' : '#10B981'};"></i> Other (${otherCount})
+                    </div>
+                `;
+            }
+
+            // Filter logic
+            let filteredDocs = [...allDocs];
+
+            if (currentFilter === 'pdf') {
+                filteredDocs = filteredDocs.filter(d => getFileExtension(d.originalName) === 'pdf');
+            } else if (currentFilter === 'notes') {
+                filteredDocs = filteredDocs.filter(d => isNotesExt(getFileExtension(d.originalName)));
+            } else if (currentFilter === 'images') {
+                filteredDocs = filteredDocs.filter(d => ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(getFileExtension(d.originalName)));
+            } else if (currentFilter === 'other') {
+                filteredDocs = filteredDocs.filter(d => {
+                    const ext = getFileExtension(d.originalName);
+                    return ext !== 'pdf' && !isNotesExt(ext) && !['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+                });
+            }
+
+            // Search filtering
+            if (searchQuery.trim()) {
+                const q = searchQuery.toLowerCase().trim();
+                filteredDocs = filteredDocs.filter(d => 
+                    (d.originalName && d.originalName.toLowerCase().includes(q)) ||
+                    (d.subject && d.subject.toLowerCase().includes(q))
+                );
+            }
+
+            // Sorting logic
+            if (currentSort === 'newest') {
+                filteredDocs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            } else if (currentSort === 'oldest') {
+                filteredDocs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            } else if (currentSort === 'name') {
+                filteredDocs.sort((a, b) => (a.originalName || '').localeCompare(b.originalName || ''));
+            }
+
+            if (filteredDocs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state-compact">
+                        <div class="empty-icon-circle"><i data-lucide="folder-open" style="width: 24px; height: 24px;"></i></div>
+                        <div class="empty-title-text">No documents found</div>
+                        <div class="empty-sub-text">Upload a study document or adjust your search and category filters.</div>
+                        <button class="btn-choose-files" onclick="document.getElementById('upload-modal').classList.add('show')" style="margin-top: 6px;">Upload File</button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            const backendBase = window.location.origin.includes('5173') ? 'http://localhost:5000' : '';
+
+            container.innerHTML = filteredDocs.map(d => {
+                const dateStr = new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const typeClass = getDocTypeClass(d.originalName);
+                const chunkLabel = d.chunkCount > 0 ? `${d.chunkCount} Chunks` : (d.status === 'INDEXED' ? 'Indexed' : (d.status || 'Uploaded'));
+                const fileLink = `${backendBase}/uploads/${d.filename}`;
+
+                return `
+                <div class="doc-card">
+                    <div class="doc-card-top">
+                        <div class="doc-type-icon ${typeClass}">
+                            <i data-lucide="${typeClass === 'img' ? 'image' : 'file-text'}" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        ${getStatusBadge(d)}
+                    </div>
+
+                    <div class="doc-title-line" title="${d.originalName}">${d.originalName}</div>
+                    <div class="doc-subject-sub">
+                        <i data-lucide="folder" style="width: 13px; height: 13px;"></i>
+                        <span>${d.subject || 'General'}</span>
+                    </div>
+
+                    <div class="doc-meta-pills">
+                        <span class="meta-pill"><i data-lucide="layers" style="width: 12px; height: 12px;"></i> ${chunkLabel}</span>
+                        <span class="meta-pill"><i data-lucide="calendar" style="width: 12px; height: 12px;"></i> ${dateStr}</span>
+                    </div>
+
+                    <div class="doc-actions-row">
+                        <button class="doc-action-btn preview" onclick="window.open('${fileLink}', '_blank')">
+                            <i data-lucide="eye" style="width: 13px; height: 13px;"></i> Preview
+                        </button>
+                        <a href="${fileLink}" download="${d.originalName}" class="doc-action-btn download">
+                            <i data-lucide="download" style="width: 13px; height: 13px;"></i> Download
+                        </a>
+                        <button class="doc-action-btn delete delete-btn" data-id="${d._id}">
+                            <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+            lucide.createIcons();
+
+            // Wire delete actions
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this document?')) {
+                        await apiFetch('/documents/' + e.currentTarget.dataset.id, { method: 'DELETE' });
+                        loadDocuments();
+                    }
+                });
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderSidebar();
+
+            // Mobile toggle
+            const menuBtn = document.getElementById('menu-toggle-btn');
+            const sidebarEl = document.getElementById('sidebar-container');
+            const overlayEl = document.getElementById('sidebar-overlay');
+            if (menuBtn && sidebarEl && overlayEl) {
+                menuBtn.addEventListener('click', () => {
+                    sidebarEl.classList.toggle('mobile-open');
+                    overlayEl.classList.toggle('mobile-open');
+                });
+                overlayEl.addEventListener('click', () => {
+                    sidebarEl.classList.remove('mobile-open');
+                    overlayEl.classList.remove('mobile-open');
+                });
+            }
+
+            // Check authentication
+            const user = await checkAuth();
+            if (user) {
+                const nameEl = document.getElementById('sidebar-user-name');
+                const initialEl = document.getElementById('sidebar-user-initial');
+                const headerInitialEl = document.getElementById('header-user-avatar');
+                if (nameEl) nameEl.innerText = user.name;
+                if (initialEl) initialEl.innerText = user.name.charAt(0).toUpperCase();
+                if (headerInitialEl) headerInitialEl.innerText = user.name.charAt(0).toUpperCase();
+            }
+
+            // Load initial documents
+            loadDocuments();
+
+            // Search handling
+            const searchInput = document.getElementById('doc-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    searchQuery = e.target.value;
+                    renderDocsUI();
+                });
+            }
+
+            // Sort handling
+            const sortSelect = document.getElementById('sort-select');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', (e) => {
+                    currentSort = e.target.value;
+                    renderDocsUI();
+                });
+            }
+
+            // Modal elements
+            const modal = document.getElementById('upload-modal');
+            const openModal = () => modal.classList.add('show');
+            const closeModal = () => modal.classList.remove('show');
+
+            document.getElementById('close-upload-modal').addEventListener('click', closeModal);
+
+            // Trigger modal on dropzone click or button click
+            const dropZone = document.getElementById('drop-zone');
+            const chooseBtn = document.getElementById('choose-files-btn');
+            const triggerBrowse = document.getElementById('trigger-browse');
+
+            if (chooseBtn) {
+                chooseBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openModal();
+                });
+            }
+
+            if (triggerBrowse) {
+                triggerBrowse.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openModal();
+                });
+            }
+
+            if (dropZone) {
+                dropZone.addEventListener('click', () => {
+                    openModal();
+                });
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.add('dragover');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.remove('dragover');
+                    }, false);
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files && files.length > 0) {
+                        const fileInput = document.getElementById('file');
+                        fileInput.files = files;
+                        openModal();
+                        document.getElementById('subject').focus();
+                    }
+                });
+            }
+
+            // Upload form submission
+            document.getElementById('upload-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const file = document.getElementById('file').files[0];
+                const subject = document.getElementById('subject').value;
+                const btn = document.getElementById('upload-btn');
+
+                if (!file) return;
+                btn.disabled = true;
+                btn.innerHTML = '<i data-lucide="loader" style="width: 16px; animation: spin 1s linear infinite;"></i> Uploading...';
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('subject', subject);
+
+                try {
+                    await apiFetch('/documents/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    closeModal();
+                    e.target.reset();
+                    loadDocuments();
+                } catch(err) {
+                    alert('Upload failed: ' + err.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="upload" style="width: 16px;"></i> Upload Document';
+                    lucide.createIcons();
+                }
+            });
+        });
+    </script>
+    <script type="module" src="js/theme.js"></script>
+</body>
+</html>
